@@ -1,0 +1,66 @@
+% !TEX root = ./../main.tex
+
+\section{Introduction}
+\label{sec:introduction}
+
+\acf{COP} is a programming paradigm that enables writing programs that have the ability to dynamically adapt their behavior in response to a given context~\cite{leger23}.
+A \ac{COP} program is organized in layers; a layer is the basic unit of behavior that encapsulates state and functionality together,
+similar to the concept of \emph{object} in \ac{OOP}. Each \emph{layer} can be activated or deactivated depending on the information provided by their
+execution environment (i.e. \emph{context})~\cite{leger23}. This de(activation)
+mechanism allows the programmer to express variability, without having to introduce statements that toggle behavior inside the domain logic of
+their program~\cite{costanza05}, achieving a better modularity and separation of concerns.
+
+
+The behavior of a \ac{COP} program is determined by a set of partial methods associated with the layers that are active at a given point in time. A \emph{partial configuration} is a set denoting the layers that are active
+or inactive at a particular point in time of the execution~\cite{Martou2024}. As the program grows in complexity, the set of all possible configurations often suffers from
+a combinatorial explosion, making it harder to test and reason about the program~\cite{Martou2024}, ultimately leading to bugs or execution anomalies.
+Validating the correctness of a context-oriented program has been a topic of interest in recent years, and several solutions have been proposed, ranging from debuggers~\cite{Uchio2011} and visualizers~\cite{Duhoux2018},
+to static analysis tools~\cite{Cardenas2023} and testing techniques~\cite{Martou2024}. However, at the time of writing, no application of Software Verification techniques to \ac{COP} have been found.
+The hypothesis of this work is that the use of Software Verification techniques would aid the developer in building more reliable context-oriented programs, by providing tools to formally reason about the interaction between layers,
+and therefore, leading to programs that are consistent and complete in the execution of specified adaptation behavior.
+
+Type Systems are one of the most widely used tools for guaranteeing the correctness of program properties~\cite{Jhala2021}. Refinement Types take it a step further, by allowing the programmer to constraint a type using logical predicates, enabling
+more expressive and precise contracts that get automatically verified at compile-time~\cite{Jhala2021}. The idea is then to express layer activations and interactions with Refinement Types, so that programmers can statically establish
+guarantees about the intended behavior of a program, without needing to dynamically validate the vast space of possible activation \emph{configurations}.
+With this work we illustrate the potential benefits of applying Software Verification techniques in \ac{COP} in the setting of a context-oriented application using Refinement Types.
+
+The long term goal of this exercise is to serve as a stepping stone to propose methodologies, design patterns or even libraries that integrate Software Verification with \ac{COP}.
+
+%\section{The Case Study: Bellevue - a Verified Graphical Editor}
+
+\emph{Bellevue} is a graphical editor inspired by \emph{Gueze}~\cite{Vallejos2010} and developed as a case study in this work. This is a sufficiently complex example to
+assess the applicability of Refinement Types in \ac{COP}, as it considers several operations and interactions between different behavioral components.
+The editor was written in Scala using the Stainless framework; a verifier for higher-order functional programs based on Refinement Types~\cite{Hamza2019}.
+A minimal abstraction to support \ac{COP} was implemented in Scala based on Predicated Generic Functions~\cite{Vallejos2010}.
+Scala was chosen primarily because
+\begin{enumerate*}[label=(\arabic*)]
+  \item there is already a robust verifier implemented in this language and
+  \item it is a higher-order functional programming language whose abstractions simplified the process of creating a light-weight \ac{COP} extension
+\end{enumerate*}
+
+
+%\section{Objectives}
+
+The main objective of this work is to illustrate how Refinement Types can be used to formally verify \ac{COP} programs,
+and to discuss the advantages and drawbacks of doing so. To achieve this, the case study will pursue the following secondary
+objectives:
+
+\begin{enumerate}[label=(\arabic*)]
+  \item Implement a simple \ac{COP} library for Scala based on Predicated Generic Functions.
+  \item Using the developed library, implement a graphical editor taking Gueze as a reference.
+  \item Integrate Stainless with the \ac{COP} library to write an specification that establishes the expected activation behavior and interactions between the components of the application.
+  \item Identify the main bugs in that were encountered due to inconsistent layer interaction, and discuss how Refinement Types can be used to detect them and fix them.
+\end{enumerate}
+
+%\section{Outline}
+
+This work is organized into six parts. \fref{sec:preliminaries} presents the preliminary concepts regarding \ac{COP} and Type Systems.
+\fref{sec:state-of-the-art} contains the state of the art around the problem of verifying \ac{COP} programs, and the main concepts to understand Refinement Types.
+\fref{sec:context-scala} defines the core abstractions of our \ac{COP} library extending Scala, which is then used in \fref{sec:case-study} to build Bellevue and verify its layer interactions.
+In the same chapter, we discuss the main type of bugs that were found during the implementation due to inconsistent layer interactions, and how they can be detected at compile-time using Refinement Types.
+\fref{sec:related-work} presents the related work, showing some of the verification approaches that have been found in other domains similar to \ac{COP} (such as Self-Adaptive Systems), as well as the usage of Refinement Types to verify the correctness of programs in areas were \ac{COP} may be applicable (such as Cyber-Physical Systems).
+Finally,\fref{sec:conclusion} concludes with the insights gained from verifying a complex \ac{COP} application with Refinement Types, and presents some future work to improve the integration between \ac{COP} and Refinement Types in our library.
+
+
+\endinput
+

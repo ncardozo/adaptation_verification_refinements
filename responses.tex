@@ -1,0 +1,56 @@
+% $Id: responses.tex 
+% !TEX root = main.tex
+
+\newpage
+
+\appendix
+
+\clearpage
+
+\subsection{Response Letter}
+
+
+As required by the reviewing process, we are submitting this response letter along with a revised 
+version of our paper entitled \textsl{Flik: A Back-in-time Debugger for Reinforcement Learning Programs}. For convenience, the letter is formatted as an appendix of the paper.
+
+We would like to thank our anonymous reviewers for their efforts in reviewing our submission and 
+for their useful and detailed suggestions to improve it. We have considered all remarks carefully, and 
+addressed them to the best of our possibilities.
+
+There are \thetotalremarks~ different remarks for this iteration of the paper, for which we have 
+effectively answered \thetotalresponses, 
+while \thetotalunsolved ~are blocked or require further feedback from the reviewers. 
+Each remark 
+is followed by our response and an explicit status indication:
+
+\begin{itemize}[nosep,label=--] 
+	\item \revtotal{solved} \statussolved 
+	\item \revtotal{future} \statusfuture
+	\item \revtotal{clarify} \statusclarify\footnote{We clarify the question made by the reviewer} 
+	\item \revtotal{reconsider} \statusreconsider\footnote{We ask the reviewer to reconsider the remark in the light of arguments and clarifications we provide in the response.} 
+	\item \revtotal{blocked} \statusblocked\footnote{We could not accommodate the remark in the text due to blocking constraints.} 
+	\item \revtotal{feedback} \statusfeedback\footnote{We answered the remark to our best interpretation. We are unsure about what the reviewer meant.} 	
+\end{itemize}
+
+The remarks with specific changes in the paper have a reference to the location in the paper 
+where the solution is found. These solutions are marked with the 
+\includegraphics[width=0.03\textwidth]{./figures/fix.pdf} icon in the paper margin for easy 
+identification. Additionally, in the margin we point to the specific remark(s) the modification 
+is addressing.
+
+
+%%
+\subsection{Review \#1}
+
+
+
+\begin{remark} \label{rem:intro}
+The introduction is overly technical.
+\end{remark}
+\begin{solved}
+We rewrote the whole introduction to have a more abstract presentation of the motivation, and reduce its technicality (\fref[vario]{par:intro}). All the technical details have been moved to a new sections providing the background on \ac{RL} (\fref{sec:rl-background} - \fref[vario]{par:background})  
+\end{solved}
+
+
+
+\endinput

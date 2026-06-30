@@ -1,0 +1,142 @@
+%%
+% !TEX root = main.tex
+
+\RequirePackage[final]{graphicx}
+\documentclass[a4paper,fleqn]{cas-sc}
+
+%\pagenumbering{arabic}
+%\pagestyle{plain}
+\input{preamble}
+\input{acronyms}
+\input{review-definitions}
+\usepackage[]{lineno}
+\linenumbers
+
+\begin{document}
+ \let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
+
+
+% Short title
+\shorttitle{Geuze}    
+
+% Short author
+\shortauthors{S. Lemus et al.}  
+
+% Main title of the paper
+\title[mode = title]{Assuring Safe Interaction Between Run-time Adaptations Using Refinement Types}  
+
+% Title footnote mark
+% eg: \tnotemark[1]
+%\tnotemark[1] 
+
+% Title footnote 1.
+% eg: \tnotetext[1]{Title footnote text}
+%\tnotetext[1]{} 
+
+% First author
+%
+% Options: Use if required
+% eg: \author[1,3]{Author Name}[type=editor,
+%       style=chinese,
+%       auid=000,
+%       bioid=1,
+%       prefix=Sir,
+%       orcid=0000-0000-0000-0000,
+%       facebook=<facebook id>,
+%       twitter=<twitter id>,
+%       linkedin=<linkedin id>,
+%       gplus=<gplus id>]
+
+\author[1]{Sebasti\'an {Lemus}}[orcid=]
+\ead{s.lemus@uniandes.edu.co}
+
+\author[2]{Jorge A. {P\'erez}}[orcid=0000-0002-1452-6180]
+\ead{j.a.perez@rug.nl}
+
+\author[1]{{Nicol\'as} {Cardozo}}[orcid=0000-0002-1094-9952]
+\ead{n.cardozo@uniandes.edu.co}
+\cormark[1]
+
+% Address/affiliation
+\affiliation[1]{organization={Systems and Computing Engineering Department, Universidad de los Andes}, 
+	city={Bogota}, 
+	country={Colombia}}
+
+\affiliation[2]{organization={University of Groningen}, 		
+	city={Groningen}, 
+	country={The Netherlands}}
+
+
+% Corresponding author text
+\cortext[1]{Corresponding author}
+
+
+
+% For a title note without a number/mark
+%\nonumnote{}
+
+% Here goes the abstract
+\begin{abstract}
+%Why
+\textbf{Purpose:} Adaptive Systems, realized in \ac{COP}, enable software systems to modify their behavior at run-time, in response to the execution context.
+Adaptations occur by means of a (de)activation mechanism that dynamically declares the scope of a given functionality, depending on the properties of the data supplied by the context.
+Though this way of writing programs may enhance modularity and expressivity, it also poses some challenges when validating the execution of the program.
+%What
+\textbf{Method:} 
+Testing a \ac{COP} program requires the programmer to reason about the immense space of possible
+state values, and how those affect the flow of the program by identifying the components that are activated or deactivated at a given point in time.
+\textbf{Results:} 
+There is an ongoing research effort to create tools and frameworks to improve the correctness of \ac{COP} programs, however, no usage of Software Verification tools have been found to date on this area.
+\textbf{Conclusion:} 
+This case study aims to illustrate how to reason about \ac{COP} programs using Refinement Types, focusing the formulation of properties regarding the \emph{interactions} between active components.
+The result of this study is a verified graphical editor application that is used to assess the integration of \ac{COP} abstractions with Refinement Types as a valid and useful approach.
+\end{abstract}
+
+% Use if graphical abstract is present
+%\begin{graphicalabstract}
+%\includegraphics{}
+%\end{graphicalabstract}
+
+% Research highlights
+\begin{highlights}
+\item Presentation of a first debugger for Reinforcement learning programs, based on back-in-time debugging capabilities.
+\end{highlights}
+
+
+% Keywords
+% Each keyword is seperated by \sep
+\begin{keywords}
+Adaptive systems \sep
+Context-oriented programming \sep
+Refinement types
+\end{keywords}
+
+
+\maketitle              % typeset the header of the contribution
+
+\input{content/introduction}
+\input{content/preliminaries}
+\input{content/state-of-the-art}
+\input{content/context-scala}
+\input{content/case-study}
+\input{content/related-work}
+\input{content/conclusion}
+
+
+%\input{responses}
+
+%%
+% !TEX root = ../main.tex
+\bibliographystyle{cas-model2-names}
+%\biboptions{sort&compress}
+\bibliography{local,bib/general, bib/compsci, bib/learning, bib/strings}
+%\printbibliography
+
+
+\end{document}
+
+
+\endinput
+

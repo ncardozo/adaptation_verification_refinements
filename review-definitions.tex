@@ -1,0 +1,153 @@
+%% Reviewing.
+\usepackage{newfile}
+\usepackage{pgf, tikz}
+%Side margins
+\usepackage[fulladjust]{marginnote}
+
+\newcounter{marginEnum}
+
+\edef\marginnotetextwidth{\the\textwidth}
+
+\newcommand{\sidemargin}[2]{
+      \refstepcounter{marginEnum}
+      \begingroup%
+      \label{#1}
+      \marginnote{ 
+        	\includegraphics[width=0.4\marginparwidth]{figures/fix}
+        	\textbf{\themarginEnum.} 
+        	#2}[0cm]
+      \endgroup%
+\xspace
+}
+
+\newcommand{\lsidemargin}[2]{
+      \refstepcounter{marginEnum}
+      \begingroup%
+      \label{#1}
+	\hspace{-3.5cm}
+        \marginnote{ 
+        	\includegraphics[width=0.5\marginparwidth]{figures/fix}
+        	\textbf{\themarginEnum.} 
+        	#2}[0cm]
+      \endgroup%
+\xspace
+}
+
+
+%References
+%% Remarks
+\newcommand*{\fancyrefremlabelprefix}{rem}
+\newcommand*{\Frefremname}{Remark}
+\newcommand*{\frefremname}{\MakeLowercase{\Frefremname}}
+\Frefformat{vario}{\fancyrefremlabelprefix}%
+  {\Frefremname\fancyrefdefaultspacing#1#3}
+\frefformat{vario}{\fancyrefremlabelprefix}%
+  {\frefremname\fancyrefdefaultspacing#1#3}
+\Frefformat{plain}{\fancyrefremlabelprefix}%
+  {\Frefremname\fancyrefdefaultspacing#1}
+\frefformat{plain}{\fancyrefremlabelprefix}%
+  {\frefremname\fancyrefdefaultspacing#1}   
+
+% par delimiter
+\newcommand*{\fancyrefparlabelprefix}{par}
+\newcommand*{\Frefparname}{Margin note}
+\newcommand*{\frefparnname}{\MakeLowercase{\Frefparname}}
+\Frefformat{vario}{\fancyrefparlabelprefix}%
+  {\Frefparname\fancyrefdefaultspacing#1#3}
+\frefformat{vario}{\fancyrefparlabelprefix}%
+  {\frefparname\fancyrefdefaultspacing#1#3}
+\Frefformat{plain}{\fancyrefparlabelprefix}%
+  {\Frefparname\fancyrefdefaultspacing#1}
+\frefformat{plain}{\fancyrefparlabelprefix}%
+  {\frefparname\fancyrefdefaultspacing#1} 
+
+\newcounter{remNumber}
+\newenvironment{remark}[1][Remark]{
+\addtocounter{remarks}{1}%
+\refstepcounter{remNumber} \begin{trivlist}
+%\newenvironment{remark}[1][Remark]{\addtocounter{remarks}{1}\begin{trivlist}
+\item[\hskip \labelsep {\bfseries\itshape #1 \theremNumber:}]}{\end{trivlist}}
+
+\colorlet{quote}{black!60}
+\colorlet{remark}{black!80}
+
+% \colorlet{unsolved}{red!90!black}
+\definecolor{solved}{hsb}    { .35, 1, .7}
+\definecolor{future}{hsb}    { .50, 1, .7}
+\definecolor{clarify}{hsb} { .65, 1, .7}
+\definecolor{reconsider}{hsb}  { .80, 1, .9}
+\definecolor{blocked}{hsb}  { .95, 1, .7}
+\definecolor{feedback}{hsb}{ .10, 1, .8}
+
+
+\newcommand{\status}[2]{\textsf{[\,\textcolor{#1}{#2}\,]}}
+\newcommand{\statussolved}{\status{solved}{Solved}}
+\newcommand{\statusfuture}{\status{future}{Future work}}
+\newcommand{\statusclarify}{\status{clarify}{Clarification}}
+\newcommand{\statusreconsider}{\status{reconsider}{Reconsider}}
+\newcommand{\statusblocked}{\status{blocked}{Blocked}}
+\newcommand{\statusfeedback}{\status{feedback}{Feedback}}
+
+
+%\makeatletter
+%\newcommand*{\@doendeq}
+% {\everypar{{\setbox\z@\lastbox}\everypar{}}}
+%\newenvironment{rev_remark}[1]
+%  {\begingroup%
+%   \color{rev_remark}%
+%   \def\FrameCommand{\vrule width 1pt \hspace{10pt}}%
+%   \MakeFramed {\advance\hsize-\width \FrameRestore}%
+%   \slshape\noindent%
+%   #1}
+%  {\endMakeFramed%
+%   \endgroup\ignorespacesafterend\aftergroup\@doendeq}
+%\makeatother
+
+\newenvironment{reconsider}{\addtocounter{reconsider}{1}\statusreconsider}{}
+\newenvironment{blocked}{\addtocounter{blocked}{1}\statublocked}{}
+\newenvironment{clarify}{\addtocounter{clarify}{1}\statusclarify}{}
+\newenvironment{feedback}{\addtocounter{feedback}{1}\statusfeedback}{}
+\newenvironment{future}{\addtocounter{future}{1}\statusfuture}{}
+\newenvironment{solved}{\addtocounter{solved}{1}\statussolved}{}
+
+\def\flags{remarks,solved,blocked,reconsider,clarify,feedback,future}
+
+\foreach \flag in \flags
+  {\expandafter\newcounter{\flag}
+   \expandafter\newcounter{total\flag}}
+
+\InputIfFileExists{\jobname.cnt}{}{}
+
+\newcounter{totalresponses}
+\defcounter{totalresponses}%
+  {\value{totalreconsider}  +
+   \value{totalclarify} +
+   \value{totalfeedback} +
+   \value{totalsolved} }
+
+\newcounter{totalunsolved}
+\defcounter{totalunsolved}%
+  {\value{totalblocked} +
+   \value{totalfeedback}}
+   
+   
+
+\newcommand{\revtotal}[1] {
+	\makebox[3ex][r]{\arabic{total#1}}
+	\if\value{#1}1 
+     	remark is flagged as \csname status#1 \endcsname
+	\else
+		remarks are flagged as \csname status#1 \endcsname
+	\fi
+} 
+
+
+\newoutputstream{counters}
+\openoutputfile{\jobname.cnt}{counters}
+
+\AtEndDocument
+  {\foreach \flag in \flags
+     {\addtostream{counters}%
+        {\noexpand\setcounter{total\flag}{\arabic{\flag}}}}
+   \closeoutputstream{counters}}
+   
