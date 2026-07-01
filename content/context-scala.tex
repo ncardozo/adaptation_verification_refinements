@@ -1,5 +1,5 @@
-% $Id:context-scala.tex  $
-% !TEX root = main.tex
+
+% !TEX root = ./../main.tex
 
 \section{\ac{COP} in Scala using Predicated Generic Functions}
 \label{sec:context-scala}
@@ -10,18 +10,18 @@
 \label{sec:predicaote-monad}
 
 In this work we implemented a light-weight \ac{COP} extension for Scala based on Predicated Generic Functions. Nonetheless, our implementation has all components to enable dynamic software adaptations, following the scoping and activation rules of \ac{COP} languages.
-Recall from \fref{sec:preliminaries.cop}, that layers encapsulate \emph{partial} behaviors which are in scope only when they are determined to be by the language's activation mechanism.
-In our implementation, we define layers using the \lstinline|PredicatedFunction| abstraction. A \lstinline|PredicatedFunction| is the combination of an activation condition and a \lstinline|Behavior|.
-The activation condition is a predicate that depends on the state of the current execution context, while the \lstinline|Behavior| is a function that may manipulate said state and return some result.
-A \lstinline|PredicatedFunction| is then a partial function that depends on a given state value (\ie context), whose \lstinline|Behavior| can only be applied if the activation predicate evaluates to \lstinline|true| for said state value.
+Recall from \fref{sec:cop}, that layers encapsulate \emph{partial} behaviors which are in scope only when they are determined to be by the language's activation mechanism.
+In our implementation, we define layers using the \scode{PredicatedFunction} abstraction. A \scode{PredicatedFunction} is the combination of an activation condition and a \scode{Behavior}.
+The activation condition is a predicate that depends on the state of the current execution context, while the \scode{Behavior} is a function that may manipulate said state and return some result.
+A \scode{PredicatedFunction} is then a partial function that depends on a given state value (\ie context), whose \scode{Behavior} can only be applied if the activation predicate evaluates to \scode{true} for said state value.
 
-A \lstinline|Behavior| is represented through the \lstinline|State| Monad: a function that takes some state and returns a product containing the new state and a result, as shown in \fref{lst:state-type}
+A \scode{Behavior} is represented through the \scode{State} Monad: a function that takes some state and returns a product containing the new state and a result, as shown in \fref{lst:state-type}
 
 \begin{scala}[label=lst:state-type, caption=A simplified definition of the State monad]
 type State[S, A] = S => (S, A)
 \end{scala}
 
-The \lstinline|State| type has a \lstinline|Functor| instance that provides a function to map over the result type, as defined in \fref{lst:state-functor}.
+The \scode{State} type has a \scode{Functor} instance that provides a function to map over the result type, as defined in \fref{lst:state-functor}.
 
 \begin{scala}[label=lst:state-functor, caption=Functor instance for the State type]
 given [S]: Functor[[X] =>> State[S, X]] with
@@ -33,7 +33,7 @@ given [S]: Functor[[X] =>> State[S, X]] with
 
 \end{scala}
 
-Additionally, the \lstinline|State| type has the \lstinline|Monad| instance shown in \fref{lst:state-monad}, specifying how to chain two state functions sequentially,
+Additionally, the \scode{State} type has the \scode{Monad} instance shown in \fref{lst:state-monad}, specifying how to chain two state functions sequentially,
 by threading the initial state through both state functions
 
 \begin{scala}[label=lst:state-monad, caption=Monad instance for the State type]
@@ -46,9 +46,9 @@ given [S]: Monad[[X] =>> State[S, X]] with
 
 \end{scala}
 
-We saw in \fref{sec:preliminaries.cop} that multiple layers can be composed together to form new behavioral variations,
+We saw in \fref{sec:cop} that multiple layers can be composed together to form new behavioral variations,
 and that each layer within the composition can access the behavior from a previously active layer.
-To achieve the same functionality with \lstinline|PredicatedFunctions|, we define a \lstinline|Behavior| to be a \lstinline|State| function that depends on a previously active computation,
+To achieve the same functionality with \scode{PredicatedFunctions}, we define a \scode{Behavior} to be a \scode{State} function that depends on a previously active computation,
 as illustrated in \fref{lst:behavior}
 
 \begin{scala}[label=lst:behavior, caption=The definition of a Behavior]
@@ -56,10 +56,10 @@ type Behavior[S, A] = A => State[S, A]
 \end{scala}
 
 Such representation enables a composable definition of \ac{COP}. \text{Layer} composition is translated to function composition,
-which is easier to implement. Rather than having a special \lstinline|proceed| construct that would require meta-programming to implement,
+which is easier to implement. Rather than having a special \scode{proceed} construct that would require meta-programming to implement,
 we use Higher-Order Functions to express state manipulations that may depend on previous computations.
 
-Finally, with these definitions in place, A \lstinline|PredicatedFunction| is defined in \fref{lst:predicated-function} as a partial \lstinline|Behavior|
+Finally, with these definitions in place, A \scode{PredicatedFunction} is defined in \fref{lst:predicated-function} as a partial \scode{Behavior}
 
 \begin{scala}[label=lst:predicated-function, caption=The definition of a Predicated Function]
 trait PredicatedFunction[S, A]:
@@ -67,14 +67,13 @@ trait PredicatedFunction[S, A]:
   def isActive(state: S): Boolean
 
   def run: Behavior[S, A]
-
 \end{scala}
 
-We use the \lstinline|Monad| instance of the \lstinline|State| type to compose various \lstinline|Behaviors|.
-There are two strategies to combine two \lstinline|PredicatedFunctions|.
+We use the \scode{Monad} instance of the \scode{State} type to compose various \scode{Behaviors}.
+There are two strategies to combine two \scode{PredicatedFunctions}.
 The first strategy consist on simply running them one after the other and feeding the result of the
 first into the second one. If only one of the two Behaviors is active for the current state, their respective result is returned, otherwise, if both are active
-at the same time, both Behaviors are chained using \lstinline|flatMap|. If neither is active, then none of the Behaviors are executed, and the result of the
+at the same time, both Behaviors are chained using \scode{flatMap}. If neither is active, then none of the Behaviors are executed, and the result of the
 most recently active Behavior is returned
 
 \begin{scala}[label=lst:predicated-function-andThen, caption=Sequential Composition of Predicated Functions]
@@ -99,7 +98,6 @@ infix def andThen[S, A](
 The following auxiliary functions (\fref{lst:predicated-function-andThen-aux}) were used to define the composition function in \fref{lst:predicated-function-andThen}:
 
 \begin{scala}[label=lst:predicated-function-andThen-aux, caption=Auxiliary functions to implement Predicated Functions]
-
 /**
 * A state transition that does not modify the state, and returns the result of the previous computation
 */
@@ -144,15 +142,14 @@ object PredicatedFunction:
       functions: NonEmptyList[PredicatedFunction[S, A]]
   ): PredicatedFunction[S, A] =
     functions.reduceLeft(_ orElse _)
-
 \end{scala}
 
-Finally, Predicated Functions can be created by extending the \lstinline|PredicatedFunction| trait as
-shown in \fref{lst:predicated-function-creation-example}. This example shows three \lstinline|PredicatedFunction| that
-depend on a context state of type \lstinline|Int|, and return a result of type \lstinline|String|.
-Each function defines a \lstinline|Behavior| that may manipulate the state in some way and return a result.
-For instance, \fref{ln:predicated-function-creation-example.fun2} shows that, when \lstinline|Fun2| is active, it adds 10 to the \lstinline|state| value, and it appends the \lstinline|"Hello from Fun2. "| string to
-the result of the most recently active \lstinline|PredicatedFunction|.
+Finally, Predicated Functions can be created by extending the \scode{PredicatedFunction} trait as
+shown in \fref{lst:predicated-function-creation-example}. This example shows three \scode{PredicatedFunction} that
+depend on a context state of type \scode{Int}, and return a result of type \scode{String}.
+Each function defines a \scode{Behavior} that may manipulate the state in some way and return a result.
+For instance, \fref{ln:predicated-function-creation-example.fun2} shows that, when \scode{Fun2} is active, it adds 10 to the \scode{state} value, and it appends the \scode{"Hello from Fun2."} string to
+the result of the most recently active \scode{PredicatedFunction}.
 
 \begin{scala}[label=lst:predicated-function-creation-example, caption=Predicated Function examples, escapechar=~]
 object Fun1 extends PredicatedFunction[Int, String]:
@@ -178,27 +175,27 @@ object Fun3 extends PredicatedFunction[Int, String]:
 \end{scala}
 
 \fref{lst:predicated-function-composition-example} demonstrates how to combine the Behaviors defined in \fref{lst:predicated-function-creation-example}
-using the two composition strategies: \lstinline|sequence| (\fref{ln:predicated-function-composition-example.fun4}) and \lstinline|oneOf| (\fref{ln:predicated-function-composition-example.fun5})
+using the two composition strategies: \scode{sequence} (\fref{ln:predicated-function-composition-example.fun4}) and \scode{oneOf} (\fref{ln:predicated-function-composition-example.fun5})
 
-\begin{scala}[label=lst:predicated-function-composition-example, caption=Predicated Function composition examples, escapechar=~]
+\begin{scala}[label=lst:predicated-function-composition-example, caption=Predicated Function composition examples]
 val initialState = 1
 val initialResult = ""
 
-val Fun4 = PredicatedFunction.sequence(Fun1, Fun2, Fun3) ~\label{ln:predicated-function-composition-example.fun4}~
-val Fun5 = PredicatedFunction.oneOf(Fun1, Fun2, Fun3) ~\label{ln:predicated-function-composition-example.fun5}~
+val Fun4 = PredicatedFunction.sequence(Fun1, Fun2, Fun3) `\label{ln:predicated-function-composition-example.fun4}`
+val Fun5 = PredicatedFunction.oneOf(Fun1, Fun2, Fun3) `\label{ln:predicated-function-composition-example.fun5}`
 
-val run1 = Fun4.run(initialState)(initialResult) ~\label{ln:predicated-function-composition-example.run1}~
+val run1 = Fun4.run(initialState)(initialResult) `\label{ln:predicated-function-composition-example.run1}`
 // run1 = (9, "Hello from Fun2. Hello from Fun3. ")
-val run2 = Fun5.run(initialState)(initialResult) ~\label{ln:predicated-function-composition-example.run2}~
+val run2 = Fun5.run(initialState)(initialResult) `\label{ln:predicated-function-composition-example.run2}`
 // run2 = (11, "Hello from Fun2. ")
 \end{scala}
 
-Given an initial state of 1, the result of the \lstinline|sequence| composition in \fref{ln:predicated-function-composition-example.run1} is \lstinline|(9, "Hello from Fun2. Hello from Fun3. ")|
-because only \lstinline|Fun2| and \lstinline|Fun3| are active for that particular value. \lstinline|Fun2| first adds 10 to the initial state, which then activates the Behavior of \lstinline|Fun3| because its predicate requires that \lstinline|state > 10|.
-The result of the \lstinline|oneOf| composition (\fref{ln:predicated-function-composition-example.run2}), on the other hand, is \lstinline|(11, "Hello from Fun2. ")| because only the first active function in the composition is executed.
+Given an initial state of 1, the result of the \scode{sequence} composition in \fref{ln:predicated-function-composition-example.run1} is \scode{(9, "Hello from Fun2. Hello from Fun3. ")}
+because only \scode{Fun2} and \scode{Fun3} are active for that particular value. \scode{Fun2} first adds 10 to the initial state, which then activates the Behavior of \scode{Fun3} because its predicate requires that \scode{state > 10}.
+The result of the \scode{oneOf} composition (\fref{ln:predicated-function-composition-example.run2}), on the other hand, is \scode{(11, "Hello from Fun2. ")} because only the first active function in the composition is executed.
 
 Note that it is not possible to get into a situation where a Predicated Function does not have access to
-a \lstinline|previous| computation. This is because their definition requires the programmer to always
+a \scode{previous} computation. This is because their definition requires the programmer to always
 give an initial state and an initial value of the result. In the case where no Functions are active,
 the result will be equal to those initial values. As it will be shown in the next chapter, this simple way of
 structuring programs matches well with the chosen architecture for adaptive systems.
@@ -208,10 +205,10 @@ structuring programs matches well with the chosen architecture for adaptive syst
 \subsection{Refined Predicated Functions}
 \label{sec:refined-predicated-functions}
 
-The \lstinline|PredicatedFunction| abstraction is enough to construct \ac{COP} programs, however it still has many of the
+The \scode{PredicatedFunction} abstraction is enough to construct \ac{COP} programs, however it still has many of the
 disadvantages explored in \fref{sec:problem-of-verifying-cop} when reasoning about the result of a functional composition. Take for instance the code in
-\fref{lst:predicated-function-composition-example}. The value of \lstinline|run1| would be different if the programmer composed the functions in a different order;
-for example, the composition \lstinline|sequence(Fun1, Fun3, Fun2)| yields \lstinline|(11, "Hello from Fun2. ")|, when applied to the pair of initial state and result \lstinline|(1, "")|.
+\fref{lst:predicated-function-composition-example}. The value of \scode{run1} would be different if the programmer composed the functions in a different order;
+for example, the composition \scode{sequence(Fun1, Fun3, Fun2)} yields \scode{(11, "Hello from Fun2. ")}, when applied to the pair of initial state and result \scode{(1, "")}.
 Furthermore, the state manipulation of a function may contradict the activation predicate of the next function in the composition chain.
 \fref{lst:predicated-function-contradictory-composition} shows an example where the first function manipulates the state in such a way that the next function will never be activated:
 
@@ -244,7 +241,7 @@ in \fref{sec:problem-of-verifying-cop}, a comprehensive validation of a \ac{COP}
 
 Our proposal takes on a different approach to verify such programs; one that enables the programmer to express properties about activations and interactions, without actually having to incur in the cost of exploring the vast space of possible states.
 Using Refinement Types, one can embed Classical Logic statements into a type and automatically verify their validity.
-The main modification that is done to the \lstinline|PredicatedFunction|, is to simply add the activation predicate as a precondition to the \lstinline|run| function, as show in \fref{lst:predicated-function-run-precondition}.
+The main modification that is done to the \scode{PredicatedFunction}, is to simply add the activation predicate as a precondition to the \scode{run} function, as show in \fref{lst:predicated-function-run-precondition}.
 
 \begin{scala}[label=lst:predicated-function-run-precondition, caption=Refinement of the input state type]
 abstract class PredicatedFunction[S, A]:
@@ -256,16 +253,16 @@ abstract class PredicatedFunction[S, A]:
     (??? : (S, A))
 \end{scala}
 
-Such change refines the type of the \lstinline|run| function to:
+Such change refines the type of the \scode{run} function to:
 
 $$
 run : A \rightarrow S\{state: S  \: | \: isActive(state) \rightarrow (S, A)\}
 $$
 
-Adding the pre-condition to the \lstinline|run| function's \lstinline|state| argument means that it can be only applied if the caller provides an \emph{evidence} that the \lstinline|isActive| predicate holds for the given \lstinline|state| input.
-Such specification also allows the programmer to bring the assumptions from the \lstinline|isActive| predicate into scope, so that they can be used when defining the program's logic. \fref{lst:predicated-function-run-precondition-example} shows
-a simple example of how an optional value can be safely accessed from within the \lstinline|run| function's scope, due to the \lstinline|isActive| precondition.
-The \lstinline|state| function parameter is refined to \lstinline|Option[BigInt]{v : v.isInstanceOf[Some] && v.get > 10}|, guaranteeing that \lstinline|state.get| will never throw an exception as it should always be an instance of the \lstinline|Some| type.
+Adding the pre-condition to the \scode{run} function's \scode{state} argument means that it can be only applied if the caller provides an \emph{evidence} that the \scode{isActive} predicate holds for the given \scode{state} input.
+Such specification also allows the programmer to bring the assumptions from the \scode{isActive} predicate into scope, so that they can be used when defining the program's logic. \fref{lst:predicated-function-run-precondition-example} shows
+a simple example of how an optional value can be safely accessed from within the \scode{run} function's scope, due to the \scode{isActive} precondition.
+The \scode{state} function parameter is refined to \lstinline|Option[BigInt]{v : v.isInstanceOf[Some] && v.get > 10}|, guaranteeing that \scode{state.get} will never throw an exception as it should always be an instance of the \scode{Some} type.
 
 
 \begin{scala}[label=lst:predicated-function-run-precondition-example, caption=Refinement Typed-Checked example of the run function]
@@ -309,10 +306,10 @@ abstract class Chainable[S, A]:
     }
 \end{scala}
 
-An instance of the \lstinline|Chainable| type serves as an evidence that, for the given \lstinline|first| and \lstinline|second| predicated functions,
-the \lstinline|isChainable| predicate holds for all possible values of \lstinline|previous: A| and \lstinline|state: S|. The property states that the
-activation condition of the \lstinline|first| function implies that, when applying it to the previous result and state, the \lstinline|second| function will be active for the new returned state.
-The type of the \lstinline|isChainable| property is shown in Equation \ref{eqn:isChainable}.
+An instance of the \scode{Chainable} type serves as an evidence that, for the given \scode{first} and \scode{second} predicated functions,
+the \scode{isChainable} predicate holds for all possible values of \scode{previous: A} and \scode{state: S}. The property states that the
+activation condition of the \scode{first} function implies that, when applying it to the previous result and state, the \scode{second} function will be active for the new returned state.
+The type of the \scode{isChainable} property is shown in Equation \ref{eqn:isChainable}.
 
 \begin{equation}
 \label{eqn:isChainable}
@@ -325,7 +322,7 @@ isChainable &: (previous: A) \\
 \end{equation}
 
 
-Note that the \lstinline|first.run| call on \fref{ln:predicated-function-chainable.first.run} must necessarily happen inside the right hand side block of the implication (\lstinline|==>|) because the \lstinline|run| function's precondition states that the \lstinline|isActive| predicate
+Note that the \scode{first.run} call on \fref{ln:predicated-function-chainable.first.run} must necessarily happen inside the right hand side block of the implication (\scode{==>}) because the \scode{run} function's precondition states that the \scode{isActive} predicate
 should hold for the given state input.
 
 The next code snippet shows two functions that satisfy this implication for all possible state values.
@@ -362,11 +359,11 @@ val chain = new Chainable[Option[BigInt], String]:
   def second: PredicatedFunction[Option[BigInt], String] = new RefinedFun2
 \end{scala}
 
-When instantiating a new \lstinline|Chainable| instance with two concrete Predicated Functions,
-Stainless will automatically verify that the \lstinline|isChainable| law holds for those particular functions.
-If, for instance, \lstinline|RefinedFun1| subtracted 10 instead of 9 to the input state (\lstinline|state.get - 10|), then
-the programmer would get a compilation error because there exists a \lstinline|state| value for which the \lstinline|isChainable| property does not hold;
-the SMT solver will also return an example of a value that makes the predicate false (in this case \lstinline|state =  11|)
+When instantiating a new \scode{Chainable} instance with two concrete Predicated Functions,
+Stainless will automatically verify that the \scode{isChainable} law holds for those particular functions.
+If, for instance, \scode{RefinedFun1} subtracted 10 instead of 9 to the input state (\scode{state.get - 10}), then
+the programmer would get a compilation error because there exists a \scode{state} value for which the \scode{isChainable} property does not hold;
+the SMT solver will also return an example of a value that makes the predicate false (in this case \scode{state =  11})
 
 
 \endinput
