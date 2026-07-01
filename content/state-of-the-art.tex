@@ -1,5 +1,5 @@
-% $Id:state-of-the-art.tex  $
-% !TEX root = main.tex
+
+% !TEX root = ./../main.tex
 
 \section{Refinement Types in Software Verification}
 \label{sec:state-of-the-art}
@@ -9,16 +9,16 @@
 \subsection{The Problem of Verifying Context-Oriented Programs}
 \label{sec:problem-of-verifying-cop}
 
-\fref{sec:preliminaries.cop} presents the challenges of reasoning about \ac{COP} programs.
+\fref{sec:cop} presents the challenges of reasoning about \ac{COP} programs.
 In general, the fact that the result of a partial method depends on the order of the composition and the current active layers, complicates the process of reasoning about the expected result; particularly so when dealing with the implicit scoping of the declarative activation mechanism.
 Programs can get complicated very quickly when layers use partial methods from other layers, as the result of a call not only depends on the activation behavior of the partial method in question, but also on the activations of the external layers that are calling such method.
 The problem is then to find a way of validating that the result behaves as expected for all possible interactions and activation configurations, but this space of possibilities is vast and may suffer from a combinatorial explosion.
 
-There are some proposals to address this problem. A recent approach puts forward the use of Combinatorial Testing to generate a set of transitions between partial configurations, in order to detect incorrect behavior that arise from the activation of specific layers~\cite{Martou2024}.
-A partial configuration is a set denoting the layers that could be active or inactive at a particular point in time of the execution~\cite{Martou2024}. Combinatorial Testing generates transitions between configurations in accordance to some heuristic.
+There are some proposals to address this problem. A recent approach puts forward the use of Combinatorial Testing to generate a set of transitions between partial configurations, in order to detect incorrect behavior that arise from the activation of specific layers~\cite{martou24}.
+A partial configuration is a set denoting the layers that could be active or inactive at a particular point in time of the execution~\cite{martou24}. Combinatorial Testing generates transitions between configurations in accordance to some heuristic.
 Heuristics are used to maximize the coverage of interactions while optimizing for performance, as it is not practical to explore the complete space of all possible transitions.
 The drawback of this is, however, that there may be some error cases that cannot be detected if the heuristic did not generate the particular transition that triggered the error.
-Combinatorial Transition Testing~\cite{Martou2024} is a technique that was proposed to improve the coverage of transitions and detect more errors.
+Combinatorial Transition Testing~\cite{martou24} is a technique that was proposed to improve the coverage of transitions and detect more errors.
 
 The objective of this work is aligned with these testing tools in the sense that both seek to prevent behavioral errors from happening due to inconsistent layer activations.
 However the approach that is taken is substantially different, as the idea is to statically verify properties about these transitions to guarantee correct behavior without the need of exploring the space of transitions.
@@ -29,38 +29,39 @@ To achieve this goal, Refinement Types are used to define a specification of the
 \subsection{Refinement Types}
 \label{sec:refinement-types}
 
-Type Systems are often viewed as a way of constraining the set of possible values that one could have, however, as it was briefly discussed in \fref{sec:preliminaries.types}, they are also a very powerful tool to prove and reason about different properties of a program.
+Type Systems are often viewed as a way of constraining the set of possible values that one could have, however, as it was briefly discussed in \fref{sec:types}, they are also a very powerful tool to prove and reason about different properties of a program.
 Refinement Types can extend a Type System with logical predicates to enable a richer specification of invariants for values and operations~\cite{jhala21}.
 The most common of Refinement Types, is defining the natural numbers by refining the type of the integers as shown in \fref{lst:refinement-nat-example}.
-Here, \lstinline|Int| is the base type that is going to be refined, and \lstinline|v| is a variable that represents any term of the base type, which is then restricted by the \lstinline|0 <= v| predicate.
+Here, \scode{Int} is the base type that is going to be refined, and \scode{v} is a variable that represents any term of the base type, which is then restricted by the \scode{0 <= v} predicate.
 
 \begin{scala}[label=lst:refinement-nat-example, caption=Defining the Naturals with Refinement Types]
-type Nat = Int{v | 0 <= v}
+type Nat = Int{v } 0 <= v}
 \end{scala}
 
-The types of the parameters and return values of a function can also be refined, effectively providing a way of specifying its preconditions and post-conditions respectively; in fact, it has been shown that Refinement Types have a deep connection with Hoare Logic~\cite{Chen2022}.
-Refinement Types also allow the developer to declare Dependent Function Types which are, in practical terms, functions whose return type may depend on the input~\cite{Rijke2022}.
+The types of the parameters and return values of a function can also be refined, effectively providing a way of specifying its preconditions and post-conditions respectively; in fact, it has been shown that Refinement Types have a deep connection with Hoare Logic~\cite{chen22}.
+Refinement Types also allow the developer to declare Dependent Function Types which are, in practical terms, functions whose return type may depend on the input~\cite{rijke22}.
 Using these features, one may describe very precise contracts that get checked at compile-time.
 For example, it is possible to declare a function for indexing an array while guaranteeing that no out of bounds error will occur.
-\fref{lst:safe-array-access} shows an example of this; note how the type of the \lstinline|index| parameter depends on the previous \lstinline|arr| parameter.
+\fref{lst:safe-array-access} shows an example of this; note how the type of the \scode{index} parameter depends on the previous \scode{arr} parameter.
 
 \begin{scala}[label=lst:safe-array-access, caption=Safe Array Access]
-def safeGet[A](arr: Array[A])(index: Nat{v | v < arr.size}): A
+def safeGet[A](arr: Array[A])(index: Nat{v } v < arr.size}): A
 \end{scala}
 
 To achieve automatic verification, Refinement Types use a \ac{SMT} solver to determine whether the logical constraint reflected by the type is true or false.
-An \ac{SMT} solver is a collection of algorithms that solve the decision problem for logical formulas drawn from combinations of certain theories such as arithmetic, arrays or uninterpreted functions~\cite{DeMoura2008}.
+An \ac{SMT} solver is a collection of algorithms that solve the decision problem for logical formulas drawn from combinations of certain theories such as arithmetic, arrays or uninterpreted functions~\cite{demoura08}.
 The types get translated into \ac{VC} constraints that the solver can understand to produce a result.
 A \ac{VC} constraint is either a quantifier-free predicate, a conjunction of constraints, or an implication from a predicate to a constraint~\cite{jhala21}.
 Equations \ref{eqn:var-eq} through \ref{eqn:arith-eq} illustrate how the predicates and \ac{VC} constraints can be constructed.
 It is important that the predicates are decidable logic formulas so that type checking stays deterministic~\cite{jhala21}.
-Even though solvers like Z3 have heuristics to work with logic theories for which there is no decision procedure (for instance, first-order logic)~\cite{DeMoura2008}, troubleshooting a type checking failure may be harder if the types rely on such heuristics, whose implementation may vary from solver to solver~\cite{jhala21}.
+Even though solvers like Z3 have heuristics to work with logic theories for which there is no decision procedure (for instance, first-order logic)~\cite{demoura08}, troubleshooting a type checking failure may be harder if the types rely on such heuristics, whose implementation may vary from solver to solver~\cite{jhala21}.
 
 \begin{equation}
 \label{eqn:var-eq}
 \text{Variables } v ::= x,y,z,\dots
 \end{equation}
 
+\begin{minipage}[t]{0.5\linewidth}
 \begin{equation}
 \begin{split}
 \text{\ac{VC} constraint } c &::= p \\
@@ -68,7 +69,9 @@ Even though solvers like Z3 have heuristics to work with logic theories for whic
   &| \quad \forall x : b \: . \: p \Rightarrow c
 \end{split}
 \end{equation}
-
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.5\linewidth}
 \begin{equation}
 \label{eqn:pred-eq}
 \begin{split}
@@ -83,9 +86,9 @@ Even though solvers like Z3 have heuristics to work with logic theories for whic
   &| \quad a \; r \; a \\
 \end{split}
 \end{equation}
+\end{minipage}
 
-\noindent
-\begin{minipage}[t]{0.4\linewidth}
+\begin{minipage}[t]{0.5\linewidth}
   \begin{equation}
   \begin{split}
   \text{Arithmetic Relation } r &::= \quad = \\
@@ -98,7 +101,7 @@ Even though solvers like Z3 have heuristics to work with logic theories for whic
   \end{equation}
 \end{minipage}
 \hfill
-\begin{minipage}[t]{0.55\linewidth}
+\begin{minipage}[t]{0.5\linewidth}
   \begin{equation}
   \label{eqn:arith-eq}
   \begin{split}
@@ -125,7 +128,7 @@ This is encoded in the congruence axiom of the solver:
 
 Uninterpreted Functions also enable a mechanism for expressing arbitrary user-defined functions and polymorphic variables~\cite{jhala21}.
 
-To illustrate how Type Checking works with Refinement Types, we present an example from Jhala and Vazou's tutorial~\cite{jhala21}.
+To illustrate how Type Checking works with Refinement Types, we present an example from the ~\citet{jhala21} tutorial.
 What follows is a definition of a Simply Typed Lambda Calculus with Refinement Types:
 
 \begin{equation}
@@ -145,7 +148,7 @@ What follows is a definition of a Simply Typed Lambda Calculus with Refinement T
 
 Note that the predicates $p$ that refine the types are drawn from the decidable formulas defined in Equation \ref{eqn:pred-eq}, and that there is a notion of $Kind$ within the language.
 A $Kind$ is a special \emph{sort} that we use to organize all the types in the language.
-To avoid the logic paradox that would arise from asserting that $Type : Type$, we can instead state that $Type : Kind$~\cite{Ragde2020}.
+To avoid the logic paradox that would arise from asserting that $Type : Type$, we can instead state that $Type : Kind$~\cite{ragde20}.
 Particularly, we have two kind levels in this language:
 \begin{enumerate*}[label=(\arabic*)]
   \item Kind $B$ is inhabited by all basic types that can be refined (\eg $int : B$) and,
@@ -316,7 +319,7 @@ Note how the Ent-ext rule was used to construct the final \ac{VC} constraint, an
 
 More complicated Refinement Type languages extend this rule set to enable more powerful capabilities like
 path-sensitive reasoning for branching expressions, polymorphic types, termination checking and, proving theorems through the Curry-Howard Interpretation of Types~\cite{jhala21}.
-Refinement Type based verifiers like LiquidHaskell~\cite{Chen2022} or Stainless~\cite{Hamza2019} have all of these features, and can be used as automated theorem provers.
+Refinement Type based verifiers like LiquidHaskell~\cite{chen22} or Stainless~\cite{hamza19} have all of these features, and can be used as automated theorem provers.
 One can describe the properties of user-defined functions following the Propositions-as-Types paradigm, by stating the property as a proposition in the Refinement Type, and constructing a term that inhabits such type as the proof of such proposition.
 For instance, one could prove that the concatenation operation on lists ($+$) is associative:
 
@@ -327,9 +330,9 @@ For instance, one could prove that the concatenation operation on lists ($+$) is
 Sometimes, the SMT solver will be able to automatically prove the given proposition, but as the properties get more complex, the programer can also explicitly provide the proof by building a term of the specified type, often using a DSL defined by the same Refinement Type language.
 
 There has been several usages of Refinement Types for developing reliable systems.
-The work done by Kuper~\cite{Kuper2022} on verifying distributed systems with LiquidHaskell is a good example of the applicability of Refinement Types in software development.
+The work done by~\citet{kuper22} on verifying distributed systems with LiquidHaskell is a good example of the applicability of Refinement Types in software development.
 Here the Refinement Types were used to formally verify that CRDT implementations are correct, by proving that the application of operations to update the CRDT state is commutative.
-A CRDT was defined as a Typeclass containing the type definitions of the operation and the proof obligation of it being commutative~\cite{Kuper2022}.
+A CRDT was defined as a Typeclass containing the type definitions of the operation and the proof obligation of it being commutative~\cite{kuper22}.
 Implementors of a CRDT instance would then be compelled to write the commutativity proof, or else the program will not compile.
 Having the verification system embedded within the same language that the programs are written on, is one of the main advantages highlighted by the proponents of Refinement Type Systems~\cite{jhala21}.
 Unlike many Software Verification tools that formally reason about a model that is separate from executable code, Refinement Types allow the developer to verify the actual code that gets executed directly.
@@ -339,9 +342,9 @@ Unlike many Software Verification tools that formally reason about a model that 
 \subsection{The Stainless Verifier}
 \label{sec:stainless}
 
-Stainless~\cite{Hamza2019} is refinement type-based verifier written in Scala used to reason about Scala programs. We use Stainless in this work for the verification of COP programs.
-In particular, Stainless is based on System FR, which is a calculus that supports System F polymorphism, Refinement Types and recursive types~\cite{Hamza2019}.
-Stainless is able to verify a purely functional subset of the Scala Language that is SMT decidable. Moreover, Stainless is also capable of verifying an imperative fragment of the language which uses mutable objects and loops~\cite{Hamza2019}.
+Stainless~\cite{hamza19} is refinement type-based verifier written in Scala used to reason about Scala programs. We use Stainless in this work for the verification of COP programs.
+In particular, Stainless is based on System FR, which is a calculus that supports System F polymorphism, Refinement Types and recursive types~\cite{hamza19}.
+Stainless is able to verify a purely functional subset of the Scala Language that is SMT decidable. Moreover, Stainless is also capable of verifying an imperative fragment of the language which uses mutable objects and loops~\cite{hamza19}.
 The following example is a verified specification of the factorial function with Stainless, taken from the framework's documentation:
 
 \begin{scala}
@@ -351,11 +354,11 @@ def fact(n: BigInt): BigInt = {
 }.ensuring(res => res >= 0)
 \end{scala}
 
-The \lstinline|require| and \lstinline|ensuring| functions are used to describe the pre-conditions and post-conditions of the \lstinline|fact| function respectively.
-Stainless translates these calls to type refinements similar to \lstinline|BigInt{v : v >= 0}| in both cases.
+The \scode{require} and \scode{ensuring} functions are used to describe the pre-conditions and post-conditions of the \scode{fact} function respectively.
+Stainless translates these calls to type refinements similar to \scode{BigInt{v : v >= 0}} in both cases.
 These refinements are then type checked as explained in \fref{sec:refinement-types}, by the generation of \ac{VC} constraints that are fed to an \ac{SMT} solver.
-Stainless also supports a termination checker based on sized types~\cite{Hamza2019}, and it is also able to prove theorems like the following,
-verifying the right-identity law of the Monoid formed by the concatenation (\lstinline|++|) operation on Lists:
+Stainless also supports a termination checker based on sized types~\cite{hamza19}, and it is also able to prove theorems like the following,
+verifying the right-identity law of the Monoid formed by the concatenation (\scode{++}) operation on Lists:
 
 \begin{scala}
   def rightUnit[A](xs: List[A]): Boolean = {
@@ -363,9 +366,9 @@ verifying the right-identity law of the Monoid formed by the concatenation (\lst
   }.holds
 \end{scala}
 
-Though propositions in Stainless are expressed as boolean expressions and not as types, it is, in principle, the same mechanism of proving propositions through the Curry-Howard interpretation that was discussed in \fref{sec:state-of-the-art.refinement-types}
+Though propositions in Stainless are expressed as boolean expressions and not as types, it is, in principle, the same mechanism of proving propositions through the Curry-Howard interpretation that was discussed in \fref{sec:refinement-types}
 Additionally, Stainless supports type refinements for user-defined \acp{ADT}, and the definition of Typeclasses that require a proof obligation of its properties.
-The following code shows an example \lstinline|Semigroup| Typeclass defined in Stainless:
+The following code shows an example \scode{Semigroup} Typeclass defined in Stainless:
 
 \begin{scala}
 trait Semigroup[A]:
@@ -376,7 +379,7 @@ trait Semigroup[A]:
     plus(x, plus(y, z)) == plus(plus(x, y), z)
 \end{scala}
 
-Any instance of \lstinline|Semigroup| should implement the \lstinline|plus| abstract member and provide the proof for the \lstinline|assocLaw| member.
+Any instance of \scode{Semigroup} should implement the \scode{plus} abstract member and provide the proof for the \scode{assocLaw} member.
 
 
 \endinput
