@@ -4,6 +4,12 @@
 \section{Preliminaries}
 \label{sec:preliminaries}
 
+This section provides the necessary background in both \ac{COP} and type systems for the 
+development of our work. We first present the main abstractions and base functionality of \ac{COP}, 
+as realized by our Scala library implementation using predicate generic functions. Then we provide a 
+brief introduction to software verification  using type systems.
+
+
 %%
 \subsection{Context-Oriented Programming}
 \label{sec:cop}
@@ -11,15 +17,22 @@
 \ac{COP} is a programming paradigm that enables the adaptation of software systems' behavior at 
 run time. \ac{COP} introduces language abstractions to define contexts, usually using the layer 
 abstraction~\cite{leger23}, and behavioral variations. At run time, behavioral variations are included to, 
-and withdrawn from the execution dynamically using the activation and deactivation of layers 
-respectively~\cite{leger23}.
+and withdrawn from the executing system dynamically using the activation and deactivation of layers 
+respectively.
 
 The two most common activation mechanisms in \ac{COP} languages are the \emph{imperative} and 
-\emph{declarative} mechanisms~\cite{leger23}. The imperative mechanism explicitly states the region 
-of code in which a layer is active. The declarative mechanism, defines the scope of the layer implicitly 
-using a boolean expression, so that whenever it evaluates to \scode{true}, the behavioral variation associated with the layer is made available.
-\fref{lst:declarative-activation} shows an example of the declarative mechanism, defining a \scode{BatterySaverLayer} that should be in scope only when the battery level is below 20 percent.
-
+\emph{declarative} mechanisms~\cite{cardozo22,elyasaf23,leger23}. The imperative mechanism 
+explicitly states the region of code in which a layer is active. \fref{lst:imperative-activation} shows an 
+example of the imperative activation mechanism in which the partial behavior associated with a layer 
+is only available within the scope of the \scode{with} abstraction, after explicitly evaluating the condition 
+to satisfy (\ie battery level is bellow 20\%). The declarative mechanism, defines the scope of the layer 
+implicitly using a boolean expression, so that whenever it evaluates to \scode{true}, the behavioral 
+variation associated with the layer is made available. \fref{lst:declarative-activation} shows an 
+example of the declarative mechanism, defining a \scode{BatterySaverLayer} that should be in scope 
+only when the battery level is below 20 percent. The effect of this is that a calling to 
+\scode{someFunctionality} anywhere else in the code (as in \fref{ln:declartive-call}) will use the 
+behavior defined in the \scode{BatterySaverLayer} if is active, or the standard behavior of the 
+\scode{phone} otherwise.
 
 \begin{scala}[label=lst:imperative-activation, caption=Imperative activation mechanism]
 val phone: Phone = ???
@@ -27,31 +40,37 @@ val phone: Phone = ???
 if batteryPercentage < 20 then
   with(BatterySaverLayer) {
     // BatterySaverLayer methods are in scope here.
-    // BatterySaverLayer may have a [[someFunctionality]] method
+    // BatterySaverLayer implements/specializes the [[someFunctionality]] method
     // that overrides the original method from the [[phone]] object
     phone.someFunctionality()
   }
-// BatterySaverLayer methods are not in scope here.
+// BatterySaverLayer methods are no longer in scope here.
 \end{scala}
 
 \begin{scala}[label=lst:declarative-activation, caption=Declarative activation mechanism]
 // The [[someFunctionality]] method definition in [[BatterySaverLayer]]
 // will override the original method from the [[phone]] object whenever
 // the given condition holds.
-BatterySaverLayer.activateWhen(batteryPercentage < 20)
+BatterySaverLayer.activateWhen(batteryPercentage < 20) 
 
-// Somewhere else in the code:
-phone.someFunctionality()
+// Somewhere else in the code 
+phone.someFunctionality() `\label{ln:declartive-call}`
 \end{scala}
 
 Layers can be stacked on top of one another to compose behavior.
 If active, a layer can add or override functionality to the layer below it in the stack.
 Layer composition happens through the \scode{adapt} function, stacking up layers from right to left.
-Take for example the code in \fref{lst:layer-composition}. Four layers (\scode{Layer1}, \scode{Layer2}, \scode{Layer3}, and \scode{Layer4}) are being created from a base \scode{Naming} type.
-Moreover, behavior variations defined in layers can access the behavior in other previously active layers (\ie underneath layers inside the layer stack), using the \scode{proceed} method as shown in \fref{ln:layer-composition.proceed-example} of \fref{lst:layer-composition}.
-As an example, consider what would happen if the \scode{names} method is called on the adapted layer from \fref{ln:layer-composition.adapted-layer}?
-The answer depends on the layers that are active at that particular point in time.
-For instance, if only \scode{Layer2} and \scode{Layer4} are active, the result would be \scode{List("Layer2", "Layer4")}.
+Take for example the code in \fref{lst:layer-composition}. Four layers (\scode{Layer1}, \scode{Layer2}, 
+\scode{Layer3}, and \scode{Layer4}) are created from a base \scode{Naming} type.
+Moreover, behavior variations defined in layers can access the behavior in other previously active 
+layers (\ie layers underneath the current layer in the layer stack), using the \scode{proceed} method 
+as shown in \fref{ln:layer-composition.proceed-example} of \fref{lst:layer-composition}.
+As an example, consider the situation of calling the \scode{names} variable from the adaptations 
+defined by the layer composition in \fref{ln:layer-composition.adapted-layer}.
+The observed behavior depends on the layers that are active at the momento of the call. For instance, 
+if only \scode{Layer2} and \scode{Layer4} are active, the call uses the implementation defined in 
+\scode{Layer2} and then proceeds to execute the definition of the behavior in \scode{Layer4}, yielding 
+a value of \scode{List("Layer2", "Layer4")} for the value \scode{composedNames}.
 
 \begin{scala}[label=lst:layer-composition, caption=Layer Composition]
 trait Naming:
@@ -76,23 +95,37 @@ object Layer4 extends Layer[Naming]:
 // [[adapt]] composes all given layers into one
 val naming: Layer[Naming] = adapt(Layer1, Layer2, Layer3, Layer4)
 // Somewhere else in the code:
-val names = naming.names // what is the result of this call? `\label{ln:layer-composition.adapted-layer}`
+val composedNames = naming.names // what is the result of this call? `\label{ln:layer-composition.adapted-layer}`
 \end{scala}
 
-Expressing variability as put forward in \ac{COP} is flexible and modular~\cite{cardozo22}, but it also comes with challenges.
-Following the previous example, what happens if \scode{Layer3} is the only active layer when calling the \scode{names} method?
-Since \scode{Layer3} is trying to access the result of the previous active layer through a \scode{proceed} call, there is no other choice than to terminate the execution with an error, as there is no other layer in scope, nor there is a base behavior to rely on (note the empty method definition in \fref{ln:layer-composition.abstract-method}).
-Layered methods are often called \emph{partial methods}, because they are only defined for their inputs when their layer is active; this also means that the resulting composition may yield an undefined behavior for certain activation \emph{configurations}.
-This issue has already been addressed through the use of Type Systems.
-Modeling activations with Typestates and Heterogeneous Lists~\cite{Aotani2015}, or declaring the dependencies between Layers at the type level~\cite{Inoue2014}, are some of the proposals that have been made to make invalid layer access un-representable.
+Expressing variability as put forward in \ac{COP} is flexible and modular~\cite{cardozo22}, but it also 
+comes with challenges. In the previous example, take the situation in which \scode{Layer3} is the only 
+active layer when calling the \scode{names} method. Since \scode{Layer3} accesses the previously
+active layer by calling \scode{proceed()}, there is no other choice than to terminate the execution with 
+an error, as there is no other layer in scope, nor there is a base behavior to rely on (note the empty 
+method definition in \fref{ln:layer-composition.abstract-method}). Layered methods are often called 
+\emph{partial methods}, because they are only defined for their inputs when their associated layer is 
+active. We highlight that, as in our example, layered methods may result in incomplete compositions;
+an undefined behavior for certain activation \emph{configurations}.
+This issue has already been addressed through the use of type systems. Modeling activations with 
+Typestates and Heterogeneous Lists~\cite{aotani15}, or declaring the dependencies between Layers 
+at the type level~\cite{inoue14}, are some of the proposals that have been made to make invalid layer 
+access un-representable.
 
-There are still situations that such Type Systems are not able to verify, especially with declarative activation mechanisms.
-For instance, \fref{lst:contradictory-activations} shows a \scode{PrinterLayer} that requires a \scode{Layer[Naming]}, but the activation condition of one layer is the negation of the other (\fref{ln:contradictory-activations.conditions}); hence, \scode{printer} will never be able to use \scode{Layer6},
-One could think that a viable solution to this, is to declare a type level dependency between both layers as it is done in JCop~\cite{Inoue2014}, however there is no apparent way to reconcile this dependency with how the activation conditions are defined. Indeed, JCop forbids declaring dependencies between layers that make use of declarative activation~\cite{Inoue2014}.
-A possible alternative would be to redefine this example in terms of layer dependencies and imperative activation, at the expense of losing the advantages that declarative activations provide.
+However, when a declarative activation mechanisms is used, there are situations in which such type 
+systems are not able to verify the program. For instance, \fref{lst:contradictory-activations} shows a 
+\scode{PrinterLayer} that requires the \scode{Layer[Naming]}, nonetheless, the activation condition of 
+one layer is the negation of the other 
+(\lnrange{ln:contradictory-activations.conditions-init}{ln:contradictory-activations.conditions-end}). 
+There, in this configuration, the \scode{printer} configuration will never be able to complete execution 
+correctly. A possible viable solution to this problem is to declare a type level dependency between both 
+layers as it is done in JCop~\cite{inoue14}. However, there is no apparent way to reconcile the 
+dependency between the layers, based on the way their activation is defined. Indeed, JCop forbids 
+declaring dependencies between layers that make use of declarative activation~\cite{inoue14}.
+Another possible alternative would be to redefine this example in terms of layer dependencies and 
+imperative activation, at the expense of losing the advantages that declarative activations provide.
 
-
-\begin{scala}[label=lst:contradictory-activations, caption=Layers with Contradictory Activation Conditions]
+\begin{scala}[label=lst:contradictory-activations, caption={Layers with Contradictory Activation Conditions}]
 trait NamePrinter:
   def printName: Unit
 
@@ -107,37 +140,45 @@ object Layer6 extends Layer[Naming]:
 val printer = PrinterLayer(Layer6)
 
 // Somewhere else in the code:
-// Activation definitions: `\label{ln:contradictory-activations.conditions}`
+// Activation definitions: 
 var x: Int = ???
 
-printer.activateWhen(x < 50)
-Layer6.activateWhen(x >= 50)
-
+printer.activateWhen(x < 50) `\label{ln:contradictory-activations.conditions-init}`
+Layer6.activateWhen(x >= 50) `\label{ln:contradictory-activations.conditions-end}`
 \end{scala}
 
-In this work, we refer to layer interactions as the implicit dependencies that are formed between two or more layers in a composition,
-where the activation and execution of one layer, may affect the activation and behavior of another layer further down in the composition chain.
-Statically verifying these dependencies is difficult, because it would require a method for reasoning about how the predicates are related.
-Though no such method has been proposed in \ac{COP} yet, several solutions have been implemented to have better validation at run-time.
-Context Petri Nets~\cite{cardozo12copn,cardozo15jist}, for instance, offer a formal model for layer interactions that can be executed and visualized.
-Other tools offer better IDE support with code navigation, generation of dependency graphs between layers and, event timelines depicting the (de)activation of layers over time~\cite{brand22}.
+In this work, we refer to layer interactions as the implicit dependencies that are formed between two or 
+more layers in a composition, where the activation and execution of one layer, may affect the activation 
+and behavior of another layer further down in the composition chain. Statically verifying these 
+dependencies is difficult, because it would require a method for reasoning about how the predicates 
+are related. Though no such method has been proposed in \ac{COP} yet, several solutions have been 
+implemented to have better validation at run-time. Context Petri Nets~\cite{cardozo12copn}, for 
+instance, offer a formal execution model to manage the consistency of layer interactions at run time. 
+Other tools offer IDE support with code navigation, generation of dependency graphs between layers 
+and, event timelines depicting the (de)activation of layers over time~\cite{duhoux19eics,brand22}.
 
-\ac{COP} languages are designed to facilitate expressing software adaptability, but at the same time, they open the door to different (more subtle) causes of bugs or strange behavior.
-Finding ways of reducing the risk of making those mistakes is still an ongoing research work
+Finding ways of reducing the risks of making the errors that may be caused by the unforeseen 
+interaction between layers is still ongoing research work for \ac{COP} languages and adaptive 
+systems in general.
 
 
 %%
 \subsection{Predicated Generic Functions}
 \label{sec:pred-gen-functions}
 
-Predicated Generic Functions are one possibility to implement \ac{COP} languages.
-It was first proposed as an extension to the \ac{CLOS} language, and it enables a fine-grained method dispatching based on logical predicates~\cite{vallejos10pred}.
-A Generic Function is a set of methods that share the same signature (name and parameters).
-A Predicated Generic Function is a Generic Function with a list of predicates (\ie boolean expressions) following a specificity ordering: the first predicate in the list is the most general, and the last is the most specific~\cite{vallejos10pred}.
-An \emph{applicable} method is a method whose predicate evaluates to true. When invoking a Predicated Generic Function, the set of applicable methods are selected, and the most specific one is executed first.
-Similar to layers, each method is able to call the next method in the list using \scode{call-next-method} (analogous to \scode{proceed}).
+Predicated generic functions are put forward as an implementation strategy for \ac{COP} 
+languages~\cite{vallejos10pred}. Predicate generic functions were first proposed as an extension to 
+the \ac{CLOS} language, to enable a fine-grained method dispatching based on logical predicates.
+A generic function encompasses a set of methods that share the same signature (name and 
+parameters). A predicated generic function is a generic function with a list of predicates (\ie boolean 
+expressions) following a specificity ordering: the first predicate in the list is the most general, and the 
+last predicate is the most specific~\cite{vallejos10pred}.
+An \emph{applicable} method is a method whose predicate(s) evaluate(s) to true. When invoking a 
+predicated generic function, the set of applicable methods are selected, and the most specific one is 
+executed first. Similar to layers, each method is able to call the next method in the list of applicable 
+methods (\ie a less specific method) using \scode{call-next-method} (analogous to \scode{proceed}).
 
-\begin{scala}[label={lst:lambic-example}, caption={Predicated Generic Functions Example in Lambic, taken from~\cite{vallejos10pred}}]
+\begin{scala}[label={lst:lambic-example}, caption={Predicated generic functions example in Lambic, taken from~\citet{vallejos10pred}.}]
 (defgeneric mouse-down (editor shape x y) `\label{ln:lambic-example.declaration}`
   (:predicates
     painting
@@ -158,37 +199,51 @@ Similar to layers, each method is able to call the next method in the list using
   (call-next-method))
 \end{scala}
 
-\fref{lst:lambic-example} Shows a Predicated Generic Function example taken from the Lambic \ac{COP} language~\cite{vallejos10pred}.
-Here, the \scode{mouse-down} generic function is declared with its predicates in \fref{ln:lambic-example.declaration}, followed by a series of method declarations that conform the generic function.
-The list of predicates is declared with the \scode{:predicates} keyword, and the activation predicate of each method is declared using the \scode{:when} keyword.
+\fref{lst:lambic-example} shows a predicated generic function example taken from the Lambic 
+\ac{COP} language~\cite{vallejos10pred}. Here, the \scode{mouse-down} generic function is declared 
+in \fref{ln:lambic-example.declaration}. The definition contains the declaration of the predicates, with 
+the \scode{:predicates} keyword, that are used for the generic function to be applicable. After the 
+definition of the predicate generic function, follow a series of method declarations that conform to the 
+generic function. The activation predicate of each method is declared using the \scode{:when} keyword.
 
-Predicated Generic Functions were chosen as the base model to implement the \ac{COP} extension for this work, since it was considered to be the most granular approach for defining behavior variability.
+Predicated generic functions are the base model to implement the \ac{COP} library for this work, since 
+they offer a fine level of granularity for defining behavior variability.
 
 
 %%
 \subsection{Type Systems and Software Verification}
 \label{sec:types}
 
-A Type Theory is a formal system comprising a set of inference rules that can be used together to make derivations.
-Such derivations are typically judgements of the form $a : A$ (term $a$ is of type $A$).
-A Type provides the rules to \emph{introduce} and \emph{eliminate} certain mathematical objects.
-The goal is then to construct terms of a certain type, and the meaning of these terms depends on the interpretation that is given to the type.
-For example, a term could be a function if the rules used to build it belong to the function type, or it could be a proof (witness) of a proposition, if the type of the term represents a proposition~\cite{rijke22}.
+A type theory is a formal system comprising a set of inference rules that can be used together to derive 
+properties about software systems. Derivations are typically judgements of the form $a : A$ (term $a$ 
+is of type $A$). A Type provides the rules to \emph{introduce} and \emph{eliminate} certain 
+mathematical objects. The goal is then to construct terms of a certain type, and the meaning of these 
+terms depends on the interpretation that is given to the type. For example, a term could be a function if 
+the rules used to build it belong to the function type, or it could be a proof (witness) of a proposition, if 
+the type of the term represents a proposition~\cite{rijke22}.
 
-Type theories have also been used in Computer Science as systems for "proving the absence of certain program behaviors"~\cite{pierce02}.
-The judgement $b : Bool$ states that $b$ may only be used in accordance the rules of the $Bool$ type; in particular, the \emph{elimination} rule for booleans, or most commonly known as \text{if-then-else}.
-Any usage of $b$ outside this set of rules would be incorrect, and the Type Checker would flag it as an inconsistency in the program.
-A Type Checker is then a program that constructs a proof tree following a set inference rules; if said tree could not be constructed for the given annotated program, then it is incorrect and a type error would be returned.
+Type theories have been used in computer science as systems for "proving the absence of certain 
+program behavior"~\cite{pierce02}. The judgement $b : Bool$ states that $b$ may only be used in 
+accordance the rules of the $Bool$ type; in particular, the \emph{elimination} rule for booleans, most 
+commonly known as \text{if-then-else}. Any usage of $b$ outside this set of rules would be incorrect.
 
-Depending on the used Type Theory, one can prove different kinds of properties about a program.
-If Linear Types are used, one may prove that certain program values are accessed at most once~\cite{wadler93}.
-If Session Types are used, one may prove that the interaction between a given set of participants behaves exactly as specified by a given communication protocol~\cite{yoshida20}.
-If a more general theory is used, for instance, Martin-Löf's Dependent Type Theory, then one may prove various mathematical statements using an \emph{intuitionistic} logical interpretation~\cite{rijke22}.
+Type checkers are program analysis tools that construct a proof tree following set inference rules. If 
+the proof tree cannot be constructed for a given annotated program, then it is incorrect and a type error 
+is returned.  A type checker flags erroneous usages of terms as inconsistencies in the program. 
 
-For this work in particular, Refinement Types will be used to prove some properties about interactions and activations in a \ac{COP} program.
-Refinement types embed assertions from classical program logic into the types~\cite{jhala21}.
-The programmer is able to extend a base type with a logical predicate, and the system will automatically verify that the term of that type complies with the specified predicate.
-One of the key goals of this Type System, is to do a seamless incorporation of formal methods into mainstream software, thanks to its automatic verification capabilities, the flexibility that it provides for building specifications via subtyping, and its inherent design that allows it to be integrated to existing languages~\cite{jhala21}.
+Depending on the type theory used, it is possible to prove different kinds of properties about a program.
+If Linear Types are used, one may prove that certain program values are accessed at most 
+once~\cite{wadler93}. If Session Types are used, one may prove that the interaction between a given 
+set of participants behaves exactly as specified by a given communication protocol~\cite{yoshida20}.
+If a more general theory is used, for instance, Martin-Löf's Dependent Type Theory, then one may 
+prove various mathematical statements using an \emph{intuitionistic} logical 
+interpretation~\cite{rijke22}.
+
+For this work in particular, Refinement Types will be used to prove some properties about interactions 
+and activations in a \ac{COP} program. Refinement types embed assertions from classical program 
+logic into the types~\cite{jhala21}. The programmer is able to extend a base type with a logical 
+predicate, and the system will automatically verify that the term of that type complies with the specified 
+predicate. We extend on the presentation of Refinement Types in the following.
 
 
 \endinput
