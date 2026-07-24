@@ -11,25 +11,6 @@ existing languages~\cite{jhala21}.
 Here we develop the details about Refinement Types, and put forward the case for using Refinement 
 types to verify \ac{COP} programs. 
 
-%%
-\subsection{The Problem of Verifying Context-Oriented Programs}
-\label{sec:problem-of-verifying-cop}
-
-\fref{sec:cop} presents the challenges of reasoning about \ac{COP} programs.
-In general, the fact that the result of a partial method depends on the order of the composition and the current active layers, complicates the process of reasoning about the expected result; particularly so when dealing with the implicit scoping of the declarative activation mechanism.
-Programs can get complicated very quickly when layers use partial methods from other layers, as the result of a call not only depends on the activation behavior of the partial method in question, but also on the activations of the external layers that are calling such method.
-The problem is then to find a way of validating that the result behaves as expected for all possible interactions and activation configurations, but this space of possibilities is vast and may suffer from a combinatorial explosion.
-
-There are some proposals to address this problem. A recent approach puts forward the use of Combinatorial Testing to generate a set of transitions between partial configurations, in order to detect incorrect behavior that arise from the activation of specific layers~\cite{martou24}.
-A partial configuration is a set denoting the layers that could be active or inactive at a particular point in time of the execution~\cite{martou24}. Combinatorial Testing generates transitions between configurations in accordance to some heuristic.
-Heuristics are used to maximize the coverage of interactions while optimizing for performance, as it is not practical to explore the complete space of all possible transitions.
-The drawback of this is, however, that there may be some error cases that cannot be detected if the heuristic did not generate the particular transition that triggered the error.
-Combinatorial Transition Testing~\cite{martou24} is a technique that was proposed to improve the coverage of transitions and detect more errors.
-
-The objective of this work is aligned with these testing tools in the sense that both seek to prevent behavioral errors from happening due to inconsistent layer activations.
-However the approach that is taken is substantially different, as the idea is to statically verify properties about these transitions to guarantee correct behavior without the need of exploring the space of transitions.
-To achieve this goal, Refinement Types are used to define a specification of the valid transitions in the program, and enforce it in such a way that an erroneous implementation using invalid transitions is detected at compile-time.
-
 
 %%
 \subsection{Refinement Types}
@@ -431,6 +412,39 @@ trait Semigroup[A]:
 
 Any instance of \scode{Semigroup} should implement the \scode{plus} abstract member and provide 
 the proof for the \scode{assocLaw} member.
+
+
+%%
+\subsection{Verifying Context-Oriented Programs with Refinement Types}
+\label{sec:problem-of-verifying-cop}
+
+Now that we have presented Refinement Types, we make an argument for the difficulties in verifying 
+\ac{COP} programs and posit Refinement Types as an option to overcome to said difficulties.
+
+In general, the result of a partial method depends on the order of the composition of layers, and the 
+current active layers. This property makes it difficult to reason about the expected behavior of a 
+\ac{COP} program, specially when using the implicit activation and scoping mechanism is used. 
+Program flow can become complicated very quickly when layers depend on partial methods provided 
+by other layers, as the result of a call does not only depend on the activation conditions of the partial 
+method called, but also on the activations of all other layers. The problem is finding  a way of 
+validating that the observed behavior is as expected for all possible interactions and activation 
+configurations. In practice, the space of possible layer combinations is exponential, making such 
+approach unfeasible.
+
+As previously mentioned, a recent validation approach puts forward the use of combinatorial testing to 
+generate a set of transitions between partial configurations, in order to detect incorrect behavior that 
+arise from the activation of specific layers~\cite{martou24}. Combinatorial testing generates transitions 
+between configurations in accordance to a given heuristic. Heuristics are used to maximize the 
+coverage of interactions while optimizing for performance, as it is not practical to explore the complete 
+space of all possible transitions. The drawback of this is, however, that there may be some error cases 
+that cannot be detected if the heuristic does not generate one particular transition triggering the error.
+
+Using Refinement Types, it is possible to statically verify properties about layer configurations to 
+guarantee correct behavior without the need to explore the full space of combinations.
+Refinement Types provide a specification for transitions between valid program configurations; that is, 
+can verify there are no incomplete program traces due to missing partial method dependencies. Using 
+Refinement Types we can enforce program completeness by design, as incomplete programs lead to 
+compile-time errors.
 
 
 \endinput
