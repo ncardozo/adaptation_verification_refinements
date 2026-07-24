@@ -4,6 +4,12 @@
 \section{Refinement Types in Software Verification}
 \label{sec:state-of-the-art}
 
+One of the key goals of Refinement Types is to do a seamless incorporation of formal methods 
+into mainstream software, thanks to its automatic verification capabilities, the flexibility that it provides 
+for building specifications via subtyping, and its inherent design that allows it to be integrated to 
+existing languages~\cite{jhala21}. 
+Here we develop the details about Refinement Types, and put forward the case for using Refinement 
+types to verify \ac{COP} programs. 
 
 %%
 \subsection{The Problem of Verifying Context-Oriented Programs}
@@ -29,35 +35,49 @@ To achieve this goal, Refinement Types are used to define a specification of the
 \subsection{Refinement Types}
 \label{sec:refinement-types}
 
-Type Systems are often viewed as a way of constraining the set of possible values that one could have, however, as it was briefly discussed in \fref{sec:types}, they are also a very powerful tool to prove and reason about different properties of a program.
-Refinement Types can extend a Type System with logical predicates to enable a richer specification of invariants for values and operations~\cite{jhala21}.
-The most common of Refinement Types, is defining the natural numbers by refining the type of the integers as shown in \fref{lst:refinement-nat-example}.
-Here, \scode{Int} is the base type that is going to be refined, and \scode{v} is a variable that represents any term of the base type, which is then restricted by the \scode{0 <= v} predicate.
+Type systems are often viewed as a way of constraining the set of possible values for terms, however, 
+as briefly discussed in \fref{sec:types}, they are also a very powerful tool to prove and reason about 
+different properties of a program. Refinement Types extend a type system with logical predicates to 
+enable a richer specification of invariants for values and operations~\cite{jhala21}.
+The canonical example of Refinement Types is the definition of natural numbers by refining the type of 
+the integers as shown in \fref{lst:refinement-nat-example}. Here, \scode{Int} is the base type 
+to be refined, and \scode{v} is a variable that represents any term adhering to the base type, which is 
+then restricted by the \scode{0 <= v} predicate.
 
-\begin{scala}[label=lst:refinement-nat-example, caption=Defining the Naturals with Refinement Types]
-type Nat = Int{v } 0 <= v}
+\begin{scala}[numbers=none,label=lst:refinement-nat-example, caption=Defining the Naturals with Refinement Types]
+  type Nat = Int{v } 0 <= v}
 \end{scala}
 
-The types of the parameters and return values of a function can also be refined, effectively providing a way of specifying its preconditions and post-conditions respectively; in fact, it has been shown that Refinement Types have a deep connection with Hoare Logic~\cite{chen22}.
-Refinement Types also allow the developer to declare Dependent Function Types which are, in practical terms, functions whose return type may depend on the input~\cite{rijke22}.
-Using these features, one may describe very precise contracts that get checked at compile-time.
-For example, it is possible to declare a function for indexing an array while guaranteeing that no out of bounds error will occur.
-\fref{lst:safe-array-access} shows an example of this; note how the type of the \scode{index} parameter depends on the previous \scode{arr} parameter.
+The types of the parameters and return values of a function can also be refined, effectively providing a 
+way of specifying its preconditions and post-conditions respectively. In fact, it has been shown that 
+Refinement Types have a deep connection with Hoare Logic~\cite{chen22}. Refinement Types also 
+allow the developer to declare Dependent Function Types which are, in practical terms, functions 
+whose return type may depend on the input~\cite{rijke22}. Using these features, one may describe very 
+precise contracts that get checked at compile-time. For example, it is possible to declare a function for 
+indexing an array while guaranteeing that no out of bounds error will occur. \fref{lst:safe-array-access} 
+shows an example of this; note how the type of the \scode{index} parameter depends on the previous 
+\scode{arr} parameter.
 
-\begin{scala}[label=lst:safe-array-access, caption=Safe Array Access]
-def safeGet[A](arr: Array[A])(index: Nat{v } v < arr.size}): A
+\begin{scala}[numbers=none,label=lst:safe-array-access, caption=Safe Array Access]
+  def safeGet[A](arr: Array[A])(index: Nat{v} v < arr.size}): A
 \end{scala}
 
-To achieve automatic verification, Refinement Types use a \ac{SMT} solver to determine whether the logical constraint reflected by the type is true or false.
-An \ac{SMT} solver is a collection of algorithms that solve the decision problem for logical formulas drawn from combinations of certain theories such as arithmetic, arrays or uninterpreted functions~\cite{demoura08}.
+To achieve automatic verification, Refinement Types use an \ac{SMT} solver to determine whether the 
+logical constraint reflected by a type is true or false. An \ac{SMT} solver is a collection of algorithms 
+that solve the decision problem for logical formulas drawn from combinations of certain theories such 
+as arithmetic, arrays, or uninterpreted functions~\cite{demoura08}.
 The types get translated into \ac{VC} constraints that the solver can understand to produce a result.
-A \ac{VC} constraint is either a quantifier-free predicate, a conjunction of constraints, or an implication from a predicate to a constraint~\cite{jhala21}.
-Equations \ref{eqn:var-eq} through \ref{eqn:arith-eq} illustrate how the predicates and \ac{VC} constraints can be constructed.
-It is important that the predicates are decidable logic formulas so that type checking stays deterministic~\cite{jhala21}.
-Even though solvers like Z3 have heuristics to work with logic theories for which there is no decision procedure (for instance, first-order logic)~\cite{demoura08}, troubleshooting a type checking failure may be harder if the types rely on such heuristics, whose implementation may vary from solver to solver~\cite{jhala21}.
+A \ac{VC} constraint is either a quantifier-free predicate, a conjunction of constraints, or an implication 
+from a predicate to a constraint~\cite{jhala21}. Equations \ref{eq:var-eq} through \ref{eq:arith-eq} 
+illustrate how the predicates and \ac{VC} constraints can be constructed. It is important that the 
+predicates are decidable logic formulas so that type checking stays deterministic~\cite{jhala21}.
+Even though solvers like Z3 have heuristics to work with logic theories for which there is no decision 
+procedure (for instance, first-order logic)~\cite{demoura08}, troubleshooting a type checking failure 
+may be harder if the types rely on such heuristics, whose implementation may vary from solver to 
+solver~\cite{jhala21}.
 
 \begin{equation}
-\label{eqn:var-eq}
+\label{eq:var-eq}
 \text{Variables } v ::= x,y,z,\dots
 \end{equation}
 
@@ -73,7 +93,7 @@ Even though solvers like Z3 have heuristics to work with logic theories for whic
 \hfill
 \begin{minipage}[t]{0.5\linewidth}
 \begin{equation}
-\label{eqn:pred-eq}
+\label{eq:pred-eq}
 \begin{split}
 \text{Predicate } p &::= true \; | \; false \\
   &| \quad v \\
@@ -103,7 +123,7 @@ Even though solvers like Z3 have heuristics to work with logic theories for whic
 \hfill
 \begin{minipage}[t]{0.5\linewidth}
   \begin{equation}
-  \label{eqn:arith-eq}
+  \label{eq:arith-eq}
   \begin{split}
   \text{Arithmetic Expression } a &::= -1,0,1,2,\dots \\
     &| \quad v \\
@@ -117,19 +137,23 @@ Even though solvers like Z3 have heuristics to work with logic theories for whic
 \end{minipage}
 \vspace{1em}
 
-Since having a decidable type checking is desirable, the language of the predicates for refining types is significantly restricted (Equation \ref{eqn:pred-eq}).
-Despite this, Refinement Types are capable of expressing complex specifications beyond basic arithmetic, due to the usage of Uninterpreted Functions as it is shown in Equations \ref{eqn:pred-eq} and \ref{eqn:arith-eq}.
-Uninterpreted Functions are functions for which the solver does not have any information other than the fact that two function applications are the same if the arguments are equal.
-This is encoded in the congruence axiom of the solver:
+Since having a decidable type checking is desirable, the language of the predicates for refining types 
+is significantly restricted (\fref{eq:pred-eq}). Despite this, Refinement Types are capable of expressing 
+complex specifications beyond basic arithmetic, due to the usage of \emph{uninterpreted functions} as 
+shown in Equations \ref{eq:pred-eq} and \ref{eq:arith-eq}. Uninterpreted functions are functions for 
+which the solver does not have any information other than the fact that two function applications are 
+the same if the arguments are equal. This is encoded in the congruence axiom of the solver:
 
 \begin{equation}
 \forall x,y \; . \; x = y \Rightarrow f(x) = f(y)
 \end{equation}
 
-Uninterpreted Functions also enable a mechanism for expressing arbitrary user-defined functions and polymorphic variables~\cite{jhala21}.
+Uninterpreted functions also enable a mechanism for expressing arbitrary user-defined functions and 
+polymorphic variables~\cite{jhala21}.
 
-To illustrate how Type Checking works with Refinement Types, we present an example from the ~\citet{jhala21} tutorial.
-What follows is a definition of a Simply Typed Lambda Calculus with Refinement Types:
+To illustrate how Type Checking works with Refinement Types, we present an example from 
+the~\citet{jhala21} tutorial. What follows is a definition of the simply typed lambda calculus with 
+Refinement Types:
 
 \begin{equation}
 \begin{split}
@@ -146,106 +170,113 @@ What follows is a definition of a Simply Typed Lambda Calculus with Refinement T
 \end{split}
 \end{equation}
 
-Note that the predicates $p$ that refine the types are drawn from the decidable formulas defined in Equation \ref{eqn:pred-eq}, and that there is a notion of $Kind$ within the language.
-A $Kind$ is a special \emph{sort} that we use to organize all the types in the language.
-To avoid the logic paradox that would arise from asserting that $Type : Type$, we can instead state that $Type : Kind$~\cite{ragde20}.
+Note that the predicates $p$ that refine the types are drawn from the decidable formulas defined in 
+\fref{eq:pred-eq}, and that there is a notion of $Kind$ within the language. A $Kind$ is a special 
+\emph{sort} that we use to organize all the types in the language. To avoid the logic paradox that 
+would arise from asserting that $Type : Type$, we can instead state that $Type : Kind$~\cite{ragde20}.
 Particularly, we have two kind levels in this language:
 \begin{enumerate*}[label=(\arabic*)]
   \item Kind $B$ is inhabited by all basic types that can be refined (\eg $int : B$) and,
-  \item Kind $\star$ is inhabited by all types in the language, including those that inhabit kind $B$ (\eg $(x:s \rightarrow t) : *$).
+  \item Kind $\star$ is inhabited by all types in the language, including those that inhabit kind $B$ (\eg $(x:s \rightarrow t) : \star$).
 \end{enumerate*}
 
-To construct the terms of this language, we must follow the inference rules defined for the Type System.
-As a starting point, we have the common rules from Dependent Type Theory to create functions as lambda terms ($\lambda$) and apply them to some input ($\lambda$-app):
+To construct the terms of this language, we must follow the inference rules defined for the type system.
+As a starting point, we have the common rules from Dependent Type Theory to create functions as 
+lambda terms ($\lambda$), apply functions to a given input ($\lambda$-app), and to evaluate and 
+unfold global definitions ($\delta$).
 
-\begin{center}
 \begin{multicols}{2}
+\centering
   \begin{prooftree}
     \hypo{ \Gamma; x : s \vdash y : t(x)  }
     \infer1[$\lambda$]{ \Gamma \vdash \lambda x . y : (x : s) \rightarrow t(x)  }
-  \end{prooftree}\break
+  \end{prooftree}
+  
   \begin{prooftree}
     \hypo{ \Gamma \vdash f : (x : s) \rightarrow t(x)  } \hypo{ \Gamma \vdash x : s }
     \infer2[$\lambda$-app]{ \Gamma \vdash f(x) : t(x) }
   \end{prooftree}
-\end{multicols}
-
+  
   \begin{prooftree}
     \hypo{ \Gamma \vdash t : \star }
     \infer1[$\delta$]{ \Gamma; x : t \vdash x : t }
   \end{prooftree}
-\end{center}
+\end{multicols}
 
 Refinement Types extend this set of rules to introduce predicate refinements for the basic types.
-All types and their refinements must be first organized in terms of the Kind system that was presented previously.
-To achieve this, the Type System has Well-Formedness rules that state how Kinds are inhabited~\cite{jhala21}:
+All types and their refinements must be first organized in terms of the Kind system that presented 
+previously. To achieve this, the type system has well-formedness rules that state how Kinds are 
+inhabited~\cite{jhala21}
 
-\begin{center}
 \begin{multicols}{2}
+\centering
   \begin{prooftree}
     \hypo{ \Gamma; x : b \vdash p }
     \infer1[Wf-base]{ \Gamma \vdash b\{x \; | \; p\} : B }
   \end{prooftree}
-  \break
+  
   \begin{prooftree}
     \hypo{ \Gamma \vdash s : k_s  } \hypo{ \Gamma; x : s \vdash t : k_t }
     \infer2[Wf-fun]{ \Gamma \vdash x : s \to t : \star }
   \end{prooftree}
-\end{multicols}
+  
   \begin{prooftree}
     \hypo{ \Gamma \vdash t : B  }
     \infer1[Wf-kind]{ \Gamma \vdash t : \star }
   \end{prooftree}
-\end{center}
+\end{multicols}
 
-To check that a Type Refinement is valid, we must build \ac{VC}s from the predicates and consult 
-with the \ac{SMT} solver if they are satisfiable. In order to do so, we introduce the Entailment 
-rules~\cite{jhala21}:
+To check that a type refinement is valid, we must build \acp{VC} from the predicates and consult 
+with the \ac{SMT} solver if they are satisfiable. In order to do so, we introduce the ntailment 
+rules~\cite{jhala21}
 
-\begin{center}
 \begin{multicols}{2}
+\centering
   \begin{prooftree}
     \hypo{ \text{Smt}(c) }
     \infer1[Ent-emp]{ \vdash c }
   \end{prooftree}
-  \break
+
   \begin{prooftree}
     \hypo{ \Gamma \vdash \forall x : b \: . \: p \Rightarrow c }
     \infer1[Ent-ext]{ \Gamma; x : b \{x \; | \; p \} \vdash c }
   \end{prooftree}
 \end{multicols}
-\end{center}
 
-Ent-emp states that any \ac{VC} constraint $c$ is valid if the \ac{SMT} solver determined that $c$ holds.
-Ent-ext, on the other hand, specifies that constraint $c$ can be derived from some context $\Gamma$ extended with $x : b \{x \; | \; p \}$,
-if the constraint $\forall x : b \: . \: p \Rightarrow c$ can be derived from $\Gamma$.
-The Type Checker will use Ent-ext to generate the \ac{VC} constraints from the Refined Type, and then it will use the Ent-emp rule to decide if the Refinement Type is valid by consulting the \ac{SMT} solver.
+The Ent-emp rule states that any \ac{VC} constraint $c$ is valid if the \ac{SMT} solver determined 
+that $c$ holds. Ent-ext specifies that constraint $c$ can be derived from some context $\Gamma$ 
+extended with the refinement of type $b$ for term $x$, $ x : b \{x \; | \; p \}$, if the constraint 
+$\forall x : b \: . \: p \Rightarrow c$ can be derived from $\Gamma$. The Type Checker will use Ent-ext 
+to generate the \ac{VC} constraints from the Refined Type, and then it will use the Ent-emp rule to 
+decide if the Refinement Type is valid by consulting the \ac{SMT} solver.
 
-Additionally, there is a notion of Subtyping that establishes relationships between the predicates of two Refined Types:
+Additionally, there is a notion of Subtyping that establishes relationships between the predicates of 
+two Refined Types:
 
-\begin{center}
 \begin{multicols}{2}
+\centering
   \begin{prooftree}
     \hypo{ \Gamma \vdash \forall v1 : b \: . \: p1 \Rightarrow p2[v2 := v1] }
     \infer1[Sub-base]{ \Gamma \vdash b\{ v1 \: | \: p1 \} \prec : b\{ v2 \: | \: p2 \} }
-  \end{prooftree}\break
+  \end{prooftree}
+  
   \begin{prooftree}
     \hypo{ \Gamma \vdash x : s } \hypo{ \Gamma \vdash s \prec : t }
     \infer2[Sub-subst]{ \Gamma \vdash x : t }
   \end{prooftree}
 \end{multicols}
-\end{center}
 
-Sub-base asserts that $b\{ v1 \: | \: p1 \}$ is a subtype of $b\{ v2 \: | \: p2 \}$, if $p1 \Rightarrow p2$ for all values of type $b$, while
-Sub-subst allows us to treat $x : s$ as a term of type $t$, if we can prove that $s$ is a subtype of $t$.
-These two rules allow us to, for instance, use a term of type $int\{v \: | \: 10 \leq v\}$ whenever we require a term of type $int\{v \: | \: 0 \leq v\}$.
+Sub-base asserts that the type refinement $b\{ v1 \: | \: p1 \}$ is a subtype of $b\{ v2 \: | \: p2 \}$, if 
+$p1 \Rightarrow p2$ for all values of type $b$, while Sub-subst allows us to treat $x : s$ as a term of 
+type $t$, if we can prove that $s$ is a subtype of $t$. These two rules allow us to, for instance, use a 
+term of type $int\{v \: | \: 10 \leq v\}$ whenever we require a term of type $int\{v \: | \: 0 \leq v\}$.
 
 Finally there are some primitive values and functions that we can use in our language.
 These primitives have the most precise semantics encoded in their type~\cite{jhala21}.
-In Equation \ref{eqn:prim}, $prim$ is an assignment from a primitive value to its type:
+In Equation \ref{eq:prim}, $prim$ is an assignment from a primitive value to its type.
 
 \begin{equation}
-\label{eqn:prim}
+\label{eq:prim}
 \begin{split}
   prim(0) &\doteq int\{ v \: | \: v = 0 \} \\
   prim(1) &\doteq int\{ v \: | \: v = 1 \} \\
@@ -254,32 +285,31 @@ In Equation \ref{eqn:prim}, $prim$ is an assignment from a primitive value to it
 \end{split}
 \end{equation}
 
-And we can use this assignment as a rule to check the types of primitive values:
+We can use this assignment as a rule to check the types of primitive values:
 
 \begin{center}
-  \begin{prooftree}
+\begin{prooftree}
     \hypo{ prim(const) \doteq A }
     \infer1[Prim]{ \vdash const : A }
-  \end{prooftree}
+\end{prooftree}
 \end{center}
 
-There are now enough rules to verify simple programs with the Refinement Type System.
-To show these rules in action, we can Type Check the following program (\ie build the proof tree for the given terms):
+There are now enough rules to verify simple programs with the Refinement Type system. To show 
+these rules in action, we can type check the following program (\ie build the proof tree for the given 
+terms).
 
-\begin{center}
-  \begin{equation}
+\begin{equation*}
   \begin{split}
     inc &: (x: int) \rightarrow int\{v = x + 1\} \\
     inc &= \lambda x . add(x)(1) \\
     fun &: int\{0 \leq v\} \rightarrow int\{0 \leq v\} \\
     fun &= \lambda x . inc(x)
   \end{split}
-  \end{equation}
-\end{center}
+\end{equation*}
 
-The $inc$ term is a function that adds 1 to its input, and the $fun$ function states that, for all integers greater or equal than 0,
-we are guaranteed to return an integer greater or equal than 0 by applying the $inc$ function to its input.
-The proof tree for the $inc$ function is the following:
+The $inc$ term is a function that adds 1 to its input, and the $fun$ function states that, for all integers 
+greater or equal than 0, we are guaranteed to return an integer greater or equal than 0 by applying the 
+$inc$ function to its input. The proof tree for the $inc$ function is the following:
 
 \begin{center}
   \begin{prooftree}
@@ -295,9 +325,10 @@ The proof tree for the $inc$ function is the following:
   \end{prooftree}
 \end{center}
 
-The tree simply applies the function introduction ($\lambda$) and function application ($\lambda$-app) rules successively until reaching the primitive rules
-for the constant terms (1 and $add$), concluding that $y$ can be replaced by 1 to form the type $(x:int) \rightarrow int\{v = x + 1\}$.
-This derivation can now be used to Type Check the $fun$ term:
+The proof tree simply applies the function introduction ($\lambda$) and function application 
+($\lambda$-app) rules successively until reaching the primitive rules for the constant terms (1 and 
+$add$), concluding that $y$ can be replaced by 1 to form the type $(x:int) \rightarrow int\{v = x + 1\}$.
+This derivation can now be used to type check the $fun$ term, as follows.
 
 \begin{center}
   \begin{prooftree}
@@ -312,53 +343,70 @@ This derivation can now be used to Type Check the $fun$ term:
   \end{prooftree}
 \end{center}
 
-Knowing that $inc(x)$ has the type $int\{v = x + 1\}$, we need to conclude that it also has the type $int\{0 \leq v\}$.
-We use the Subtyping rules to prove that $inc(x)$ has the type $int\{0 \leq v\}$ by generating the \ac{VC} constraint:
-$\forall x : int \: . \: 0 \leq x \Rightarrow \forall v : int \: . \: v = x + 1 \Rightarrow 0 \leq v$; which is deemed true by the \ac{SMT} solver.
-Note how the Ent-ext rule was used to construct the final \ac{VC} constraint, and how Ent-emp was used to call the \ac{SMT} solver.
+Knowing that $inc(x)$ has the type $int\{v = x + 1\}$, we need to conclude that it also has the type 
+$int\{0 \leq v\}$. We use the Subtyping rules to prove that $inc(x)$ has the type $int\{0 \leq v\}$ by 
+generating the \ac{VC} constraint: 
+$\forall x : int \: . \: 0 \leq x \Rightarrow \forall v : int \: . \: v = x + 1 \Rightarrow 0 \leq v$; which is 
+deemed true by the \ac{SMT} solver. Note how the Ent-ext rule was used to construct the final \ac{VC} 
+constraint, and how Ent-emp was used to call the \ac{SMT} solver.
 
-More complicated Refinement Type languages extend this rule set to enable more powerful capabilities like
-path-sensitive reasoning for branching expressions, polymorphic types, termination checking and, proving theorems through the Curry-Howard Interpretation of Types~\cite{jhala21}.
-Refinement Type based verifiers like LiquidHaskell~\cite{chen22} or Stainless~\cite{hamza19} have all of these features, and can be used as automated theorem provers.
-One can describe the properties of user-defined functions following the Propositions-as-Types paradigm, by stating the property as a proposition in the Refinement Type, and constructing a term that inhabits such type as the proof of such proposition.
-For instance, one could prove that the concatenation operation on lists ($+$) is associative:
+More complicated Refinement Type languages extend this rule set to enable more powerful capabilities 
+like path-sensitive reasoning for branching expressions, polymorphic types, termination checking and, 
+proving theorems through the Curry-Howard interpretation of types~\cite{jhala21}.
+Refinement Type based verifiers like LiquidHaskell~\cite{chen22} or Stainless~\cite{hamza19} have all 
+of these features, and can be used as automated theorem provers. One can describe the properties of 
+user-defined functions following the Propositions-as-Types paradigm, by stating the property as a 
+proposition in the Refinement Type, and constructing a term that inhabits such type as the proof of such 
+proposition. For instance, one could prove that the concatenation operation on lists ($+$) is associative:
 
-\begin{equation}
+\begin{equation*}
   listAssoc : (l1 \; l2 \; l3 : list(a)) \rightarrow unit\{ \; l1 + (l2 + l3) = (l1 + l2) + l3 \; \}
-\end{equation}
+\end{equation*}
 
-Sometimes, the SMT solver will be able to automatically prove the given proposition, but as the properties get more complex, the programer can also explicitly provide the proof by building a term of the specified type, often using a DSL defined by the same Refinement Type language.
+Sometimes, the SMT solver will be able to automatically prove the given proposition, but as the 
+properties get more complex, the programer can also explicitly provide the proof by building a term of 
+the specified type, often using a DSL defined by the same Refinement Type language.
 
-There has been several usages of Refinement Types for developing reliable systems.
-The work done by~\citet{kuper22} on verifying distributed systems with LiquidHaskell is a good example of the applicability of Refinement Types in software development.
-Here the Refinement Types were used to formally verify that CRDT implementations are correct, by proving that the application of operations to update the CRDT state is commutative.
-A CRDT was defined as a Typeclass containing the type definitions of the operation and the proof obligation of it being commutative~\cite{kuper22}.
-Implementors of a CRDT instance would then be compelled to write the commutativity proof, or else the program will not compile.
-Having the verification system embedded within the same language that the programs are written on, is one of the main advantages highlighted by the proponents of Refinement Type Systems~\cite{jhala21}.
-Unlike many Software Verification tools that formally reason about a model that is separate from executable code, Refinement Types allow the developer to verify the actual code that gets executed directly.
+There have been several usages of Refinement Types for developing reliable systems. The work done 
+by~\citet{kuper22} on verifying distributed systems with LiquidHaskell is a good example of the 
+applicability of Refinement Types in software development. In that work, Refinement Types are 
+used to formally verify that CRDT implementations are correct, by proving that the application of 
+operations to update the CRDT state is commutative. A CRDT was defined as a Typeclass containing 
+the type definitions of the operation and the proof obligation of it being commutative~\cite{kuper22}.
+Implementors of a CRDT instance are compelled to write the commutativity proof, otherwise the 
+program will not compile. Having the verification system embedded within the same language that the 
+programs are written on, is one of the main advantages highlighted by the proponents of Refinement 
+Type Systems~\cite{jhala21}. Unlike many software verification tools that formally reason about a 
+model that is separate from executable code, Refinement Types allow the developer to verify the 
+actual code that gets executed directly.
 
 
 %%
 \subsection{The Stainless Verifier}
 \label{sec:stainless}
 
-Stainless~\cite{hamza19} is refinement type-based verifier written in Scala used to reason about Scala programs. We use Stainless in this work for the verification of COP programs.
-In particular, Stainless is based on System FR, which is a calculus that supports System F polymorphism, Refinement Types and recursive types~\cite{hamza19}.
-Stainless is able to verify a purely functional subset of the Scala Language that is SMT decidable. Moreover, Stainless is also capable of verifying an imperative fragment of the language which uses mutable objects and loops~\cite{hamza19}.
-The following example is a verified specification of the factorial function with Stainless, taken from the framework's documentation:
+Stainless~\cite{hamza19} is refinement type-based verifier written in Scala used to reason about Scala 
+programs. We use Stainless in this work for the verification of COP programs. In particular, Stainless is 
+based on System FR, which is a calculus that supports System F polymorphism, Refinement Types, 
+and recursive types~\cite{hamza19}. Stainless is able to verify a purely functional subset of Scala that 
+is SMT decidable. Moreover, Stainless is also capable of verifying an imperative fragment of the 
+language which uses mutable objects and loops~\cite{hamza19}. The following example is a verified 
+specification of the factorial function with Stainless, taken from the framework's documentation.
 
 \begin{scala}
-def fact(n: BigInt): BigInt = {
-  require(n >= 0)
-  if n == 0 then BigInt(1) else n * fact(n -1)
-}.ensuring(res => res >= 0)
+  def fact(n: BigInt): BigInt = {
+    require(n >= 0)
+    if n == 0 then BigInt(1) else n * fact(n -1)
+  }.ensuring(res => res >= 0)
 \end{scala}
 
-The \scode{require} and \scode{ensuring} functions are used to describe the pre-conditions and post-conditions of the \scode{fact} function respectively.
-Stainless translates these calls to type refinements similar to \scode{BigInt{v : v >= 0}} in both cases.
-These refinements are then type checked as explained in \fref{sec:refinement-types}, by the generation of \ac{VC} constraints that are fed to an \ac{SMT} solver.
-Stainless also supports a termination checker based on sized types~\cite{hamza19}, and it is also able to prove theorems like the following,
-verifying the right-identity law of the Monoid formed by the concatenation (\scode{++}) operation on Lists:
+The \scode{require} and \scode{ensuring} functions are used to describe the pre-conditions and 
+post-conditions of the \scode{fact} function respectively. Stainless translates these calls to type 
+refinements similar to \scode{BigInt{v : v >= 0}} in both cases. These refinements are then type 
+checked as explained in \fref{sec:refinement-types}, by the generation of \ac{VC} constraints that are 
+fed to an \ac{SMT} solver. Stainless also supports a termination checker based on sized 
+types~\cite{hamza19}, and it is also able to prove theorems like the right-identity law of the Monoid 
+formed by the concatenation (\scode{++}) operation on Lists.
 
 \begin{scala}
   def rightUnit[A](xs: List[A]): Boolean = {
@@ -366,9 +414,11 @@ verifying the right-identity law of the Monoid formed by the concatenation (\sco
   }.holds
 \end{scala}
 
-Though propositions in Stainless are expressed as boolean expressions and not as types, it is, in principle, the same mechanism of proving propositions through the Curry-Howard interpretation that was discussed in \fref{sec:refinement-types}
-Additionally, Stainless supports type refinements for user-defined \acp{ADT}, and the definition of Typeclasses that require a proof obligation of its properties.
-The following code shows an example \scode{Semigroup} Typeclass defined in Stainless:
+Though propositions in Stainless are expressed as boolean expressions and not as types, it is, in 
+principle, the same mechanism of proving propositions through the Curry-Howard interpretation   
+discussed in \fref{sec:refinement-types}. Additionally, Stainless supports type refinements for 
+user-defined \acp{ADT}, and the definition of Typeclasses that require a proof obligation of its 
+properties. The following code shows an example \scode{Semigroup} Typeclass defined in Stainless.
 
 \begin{scala}
 trait Semigroup[A]:
@@ -379,7 +429,8 @@ trait Semigroup[A]:
     plus(x, plus(y, z)) == plus(plus(x, y), z)
 \end{scala}
 
-Any instance of \scode{Semigroup} should implement the \scode{plus} abstract member and provide the proof for the \scode{assocLaw} member.
+Any instance of \scode{Semigroup} should implement the \scode{plus} abstract member and provide 
+the proof for the \scode{assocLaw} member.
 
 
 \endinput
