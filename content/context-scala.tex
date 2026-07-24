@@ -214,7 +214,6 @@ Furthermore, the state manipulation of a function may contradict the activation 
 
 
 \begin{scala}[label=lst:predicated-function-contradictory-composition, caption=Contradictory composition example]
-
 object Fun2 extends PredicatedFunction[Int, String]:
   override def isActive(state: Int): Boolean =
     state > 0
