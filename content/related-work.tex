@@ -1,80 +1,126 @@
-
 % !TEX root = ./../main.tex
 
 \section{Related Work}
 \label{sec:related-work}
 
-This chapter presents existing proposals that use Type Systems to verify \ac{COP} programs,
-as well as existing verification approaches that use Refinement Types
-(\eg in Reactive Programming, a paradigm used to implement \ac{COP}~\cite{watanabe14,leger23})
+We now explore existing proposals related to our work in three directions. Approaches that use type 
+systems to verify \ac{COP} programs, existing verification approaches that use Refinement Types
+(\eg in Reactive Programming, a paradigm used to implement \ac{COP}~\cite{watanabe14,leger23}),
 and verification techniques in domains closely related to \ac{COP} such as Self-Adaptive Systems
-(the broad domain that \ac{COP} belongs to~\cite{cardozo22}) and Actor Systems~\cite{watanabe14}
+and Actor Systems~\cite{watanabe14}.
 
 
-\subsection{Type Systems in \acl{COP}}
+%%
+\subsection{Use of Type Systems in \acl{COP}}
 \label{sec:types-cop}
 
 There exist several Type-based solutions to verify the properties of \ac{COP} programs.
-~\citet{aotani15} propose an abstraction to guarantee that layers relying on an imperative activation mechanism do not call methods on other layers that are inactive.
-This is done by modeling layer activation with Typestates. A Typestate denotes the run-time state of a resource so that we can determine when an operation can be applied to the resource, and how it changes the resource's state~\cite{aotani15}.
-In particular, there are two Typestates in this approach: the type $\uparrow L$, denoting that the layer $L$ is active, and the type $\downarrow L$, denoting that the layer $L$ is inactive.
-This way of tracking the state of layers allows us to define the $activate$ and $deactivate$ operations in a way that they can only be applied to a consistent state, \ie the $activate$ function can only be applied to a layer with type $\downarrow L$,
-and the $deactivate$ function can only be applied to layers with type $\uparrow L$.
-Even though this solves a different problem than the one presented in our work, using Refinement Types we can make this guarantee when we add the \scode{isActive} predicate as a precondition to the \scode{run} function.
+~\citet{aotani15} propose an abstraction to guarantee that layers relying on an imperative activation 
+mechanism do not call methods on other layers that are inactive. This is done by modeling layer 
+activation with Typestates. A Typestate denotes the run-time state of a resource so that we can 
+determine when an operation can be applied to the resource, and how it changes the resource's state.
+In particular, there are two Typestates in the approach. The type $\uparrow L$, denotes that layer 
+$L$ is active, and the type $\downarrow L$, denotes that layer $L$ is inactive. This way of tracking the 
+state of layers allows us to define the \scode{activate} and \scode{deactivate} operations in a way that 
+they can only be applied to a consistent state, \ie the \scode{activate} function can only be applied to  
+layers with type $\downarrow L$, and the \scode{deactivate} function can only be applied to layers with 
+type $\uparrow L$.
+The problem solved with Typestates focuses only on the consistency of activation/deactivation 
+operations, and not on the interaction between layers. Using Refinement Types we can have the same 
+guarantees when we add the \scode{isActive} predicate as a precondition to the \scode{run} function.
 
-Other works like JCop~\cite{inoue14} have Type-level constructions to verify layer interactions, by explicitly stating the dependency between two layers in their type definition.
-For instance, given two layers \scode{L1} and \scode{L2}, the programmer can specify a dependency between them in JCop by using the \scode{requires} keyword, ensuring that \scode{L1} is always activated before \scode{L2} (\scode{public layer L1 requires L2}).
-This approach, however, only works well for imperative activation mechanisms as it was briefly discussed in \fref{sec:preliminaries.cop}.
-No alternatives have been found to statically verify layer interactions with declarative activation mechanism, and our approach with Refinement Types puts forward a viable solution to do so.
+JCop~\cite{inoue14} has Type-level constructions to verify layer interactions, by explicitly stating the 
+dependency between two layers in their type definition. For instance, given two layers \scode{L1} and 
+\scode{L2}, the programmer can specify a dependency between them in JCop by using the 
+\scode{requires} keyword, ensuring that \scode{L1} is always activated before \scode{L2} 
+(\scode{public layer L1 requires L2}).
+This approach, however, only works well for imperative activation mechanisms as it was briefly 
+discussed in \fref{sec:cop}. No alternatives have been found to statically verify layer interactions with 
+declarative activation mechanism, and our approach with Refinement Types puts forward a viable 
+solution to do so.
 
 
 %%
-\section{Verification in Reactive Programming}
+\subsection{Verification of Reactive Programs Using Refinement Types}
 \label{sec:verification-reactive-programming}
 
-Reactive Programming is a paradigm in which programs \emph{react} to values that vary through time.
-It is common to find applications that require software adaptability (such as IoT systems or web applications) which also use Reactive Programming.
-Note that the application developed in this case study also relied on an abstraction that dictated how the program should react to changes in the state (the \scode{DrawingModel}).
-The \scode{update} function, in particular, was the main supplier of the relevant time-varying values (state and messages).
+in the \ac{RP} paradigm programs \emph{react} to values that vary through time.
+It is common to find applications that require software adaptability (such as IoT systems or web 
+applications) implemented with \ac{RP}. For example, Bellevue relies on an abstraction that dictates how 
+the program should react to changes in the state (the \scode{DrawingModel}). The \scode{update} 
+function, in particular, is the main source of the relevant time-varying values (state and messages).
 
-Software Verification is used in this area to have a precise description of the desired run-time behavior of a reactive program.
-The work by~\citet{chen24} is an example of how this can be accomplished in Cyber-Physical Systems based on Synchronous Programming.
-Refinement Types are used to describe post-conditions for functions that process the time-varying data (\ie streams), as well as to declare invariants over such data.
-A Type System is developed by extending the Refinement Types language with predicates drawn from Linear Temporal Logic~\cite{chen24}.
-These predicates are used to reason about the behavior of data streams; in particular, it introduces the $\{ w : b \; | \; \square \; \phi \}$ refinement to specify that $\phi$ must hold for all values of the stream $w$ from the current instant of time onwards,
-and the $\{ w : b \; | \; \bigcirc \; \phi \}$ refinement to describe that $\phi$ must hold in the next time instant~\cite{chen24}.
-The resulting system allows a programmer to formally verify, simulate and deploy Cyber-Physical Systems.
+Software verification is used in \ac{RP} to have a precise description of the desired run-time behavior of 
+a reactive program. The work by~\citet{chen24} is an example of using Refinement Types to verify \ac{RP} programs. Refinement Types are used 
+to describe post-conditions for functions that process time-varying data (\ie streams), as well as to 
+declare invariants over such data. A type system is developed extending the Refinement Types 
+language with predicates drawn from Linear Temporal Logic. These predicates are used to reason 
+about the behavior of data streams. In particular, the type system introduces the 
+$\{ w : b \; | \; \square \; \phi \}$ refinement to specify that $\phi$ must hold for all values of the stream 
+$w$ from the current instant of time onwards, and the $\{ w : b \; | \; \bigcirc \; \phi \}$ refinement to 
+describe that $\phi$ must hold in the next time instant. The resulting system allows programmers to 
+formally verify, simulate and deploy Cyber-Physical Systems.
 
-Our approach could benefit from this Temporal Logic extension to prove more sophisticated properties like the one discussed in \fref{sec:case-study.discussion}.
-For example, the desired property where the \scode{ColorFillAction} always receives the canvas bitmap if, at some previous point in time, the user selected the \scode{ColorFill} tool,
-is an specification that could be written using Temporal Logic.
+The use of Refinement Types to verify Cyber-Physical Systems is closely related to our proposal. First, 
+Cyber-Physical Systems are an application domain of \ac{COP}, often benefiting from dynamic 
+adaptation. Second, as mentioned before, there are \ac{COP} languages based on \ac{RP}, so the use 
+of Refinement Types in an \ac{RP} context can translate naturally to reactive-based \ac{COP} 
+languages. 
+
+Moreover over, we note that our approach could benefit from this Temporal Logic extension to prove 
+more sophisticated properties. For example, to prove that the \scode{ColorFillAction} always receives 
+the canvas bitmap if, at some previous point in time, the user selected the \scode{ColorFill} tool, is an 
+specification that could be written using Temporal Logic.
 
 
 %%
-\section{Verification in Actor Systems for Software Adaptability}
+\subsection{Verification in Actor Systems for Software Adaptability}
 \label{sec:verification-actors}
 
-\citet{harvey21} worked on \emph{EnsembleS}, an actor-based language based on Multiparty Session Types to define an verify programs that can \emph{adapt} their behavior in response to the operating environment.
-\emph{Adaptability} in this context refers to the ability of sensing the environment and respond by \emph{discovering} new components, \emph{replacing} behavior or \emph{communicating} information.
-EnsembleS defines actors as single-threaded entities that do not share state, and have a channel-based message communication between each other.
-The programmer is able to create Static Topologies, where all participants are present throughout the duration of a session, as well as Dynamic Topologies where participants can connect or disconnect at a given point in the session.
+EnsembleS~\cite{harvey21} is an actor-based language based on Multiparty Session Types to 
+define an verify programs that can \emph{adapt} their behavior in response to the operating 
+environment. \emph{Adaptability} in this context refers to the ability of sensing the environment and 
+respond by \emph{discovering} new components, \emph{replacing} behavior or \emph{communicating} 
+information. EnsembleS defines actors as single-threaded entities that do not share state, and have a 
+channel-based message communication between each other. The programmer is able to create static 
+topologies, where all participants are present throughout the duration of a session, as well as dynamic 
+topologies where participants can connect or disconnect at a given point in the session.
 
-The main contribution of this work is the static verification of dynamic interaction and replacement of functionality, which cannot be guaranteed by using Multiparty Session Types alone. EnsembleS offers the \scode{link} and \scode{unlink} statements to enable dynamic connectivity,
-and it verifies that the replacement of functionality does not violate the communication protocol that is already established by the Session Type.
-We could take inspiration from this work to have an alternative formulation to verify \ac{COP} programs with Session Types, where one can granularly specify the sequence of steps of a program with Session Types, and model (de)activation with a replacement mechanism similar to the one defined for this language.
-This would greatly differ from the Refinement Types alternative, as the programmer would need to explicitly specify all steps in the flow of the \ac{COP} program.
+The main contribution of this work is the static verification of dynamic interaction and replacement of 
+functionality, which cannot be guaranteed by using Multiparty Session Types alone. EnsembleS offers 
+the \scode{link} and \scode{unlink} statements to enable dynamic connectivity,  and verifies that the 
+replacement of functionality does not violate the communication protocol that is already established by 
+the Session Type. 
+It is possible to consider an alternative formulation to verify \ac{COP} programs with Session Types, 
+where one can granularly specify the sequence of steps of a program with Session Types, and model 
+(de)activation with a replacement mechanism similar to the one defined for EnsambleS. This would 
+greatly differ from the Refinement Types alternative, as the programmer would need to explicitly 
+specify all steps in the flow of the \ac{COP} program. However, such an approach could suffer from 
+the state explosion problem of interactions between adaptations.
 
 
 %%
-\section{Verification in Self-Adaptive Systems}
+\subsection{Verification in Self-Adaptive Systems}
 \label{sec:verification-as}
 
-\citet{weyns12} present a survey of the formal methods that are being employed in Self-Adaptive Systems. The research compiled various studies from conferences and journals, and discussed the main methods that have been used to formally reason about such systems, as well as the main program properties of interest to the researchers.
-It observed that Algebra was the main modeling language for property specification, but a very limited set of studies actually used automated reasoning to evidence the validity of such properties; the ones that do, often used Model Checking or Theorem Proving to a lesser extent. Liveness, safety and reachability were some of the common properties of interest,
-but most studies focused on verifying some behavior specific to the use case or area of self-adaptation.
-One of the main remarks made in this survey, is that there are not many studies that make use of Software Verification in this area, and that there is a need of light-weight and pluggable verification tools~\cite{weyns12}.
-Refinement Types could be a good candidate in that regard, as they provide a seamless and pluggable integration of property specification within the same language in which the application is being developed.
-Furthermore, this approach shares some similarities with Model Checking in the sense that Refinement Types use \ac{SMT} solvers to validate the verification constraints, and some Model Checkers use a SAT solver to check the satisfiability of a propositional formula that represents the program traces of the finite state system under verification~\cite{armando06}.
+\citet{weyns12} present a survey of the existing formal methods for Self-Adaptive Systems. The 
+survey compiles various studies from conferences and journals, and discusses the main methods that 
+have been used to formally reason about such systems, as well as the main program properties of 
+interest to the researchers.
+The main modeling language for property specification is algebra, but a very limited set of studies 
+actually used automated reasoning to evidence the validity of such properties. The ones that do, often 
+use Model Checking or Theorem Proving to a lesser extent. Liveness, safety, and reachability are 
+some of the common properties of interest, but most studies focus on verifying behavior specific to the 
+use case or area of self-adaptation.
+One of the main remarks from the survey, is that there are not many studies that make use of software 
+verification in this area, and that there is a need of light-weight and pluggable verification 
+tools~\cite{weyns12}. As validated from our approach, Refinement Types could be a good candidate in 
+that regard, as they provide a seamless and pluggable integration of property specification within the 
+same language in which the application is being developed.
+Furthermore, Refinement Types shares some similarities with model checking in the sense that 
+Refinement Types use \ac{SMT} solvers to validate the verification constraints, with model checkers 
+using SAT solvers to check the satisfiability of a propositional formula that represents the program 
+traces of the finite state system under verification~\cite{armando06}.
 
 
 \endinput
