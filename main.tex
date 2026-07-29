@@ -79,28 +79,28 @@
 % Here goes the abstract
 \begin{abstract}
 %Why
-\textbf{Purpose:} Adaptive Systems, realized in \ac{COP}, enable software systems to modify their 
-behavior at run-time, in response to the execution context. Adaptations occur by means of a 
-(de)activation mechanism that dynamically declares the scope of a given functionality, depending on 
-the properties of the data supplied by the context. Though this way of writing programs may enhance 
-modularity and expressivity, it also poses challenges when validating the execution of the program.
-Testing a \ac{COP} program requires the programmer to reason about the immense space of possible
-state values, and how those affect the flow of the program by identifying the components that are 
-activated or deactivated at a given point in time.
+~\textbf{Purpose:} Adaptive Systems, realized by \ac{COP}, enable software systems to modify their 
+behavior at run time, in response to the execution context. Adaptations occur by means of a 
+(de)activation mechanism that dynamically declares the scope of a given functionality. Writing 
+programs in a \ac{COP} fashion enhances modularity and expressivity, however, it also poses 
+challenges when validating the execution of the program. Testing \ac{COP} programs requires 
+programmers to reason about the immense space of possible state values, and how those affect the 
+flow of the program by identifying the components that are activated or deactivated at a given point in 
+time.
 %What
 \textbf{Method:} 
 There is an ongoing research effort to create tools and frameworks to improve the correctness of 
 \ac{COP} programs, however, no usage of software verification tools have been found to date on this 
-area. We propose a framework to formally verify the completeness of adaptations. That is, that all 
-functionality associated with a context is available to complete execution of the adaptation. 
+area. We propose a framework based on Refinement Types to formally verify the consistency and 
+completeness of adaptations. 
 \textbf{Results:} 
-We present a case study of a graphical editor application to illustrate how to reason about \ac{COP} 
-programs using refinement types, focusing the formulation of properties regarding the interactions 
-between active adaptations. The result of this study is a verified assessment of the use of refinement 
-types to validate the completeness of dynamically adaptive systems.
+We use a case study of a graphical editor, illustrating how to reason about \ac{COP} programs using 
+refinement types, focusing the formulation of properties regarding the interactions between active 
+adaptations. The result of this study is a verified assessment of the use of refinement types to validate 
+the consistency and completeness of dynamically adaptive systems.
 \textbf{Conclusion:} 
-With this work we illustrate the benefits to the consistency and completeness of applying software 
-verification techniques to \ac{COP}, by means of refinement types.
+With this work we illustrate the benefits of software verification techniques for \ac{COP}, by means of 
+Refinement Types.
 \end{abstract}
 
 % Use if graphical abstract is present
