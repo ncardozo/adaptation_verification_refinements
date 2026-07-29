@@ -3,55 +3,57 @@
 \section{Introduction}
 \label{sec:introduction}
 
-\acf{COP} is a programming paradigm that enables writing programs that have the ability to dynamically 
-adapt their behavior in response to their execution 
-context~\cite{hirschfeld08cop,appeltauer09cop,salvaneschi12survey,mens16,alegre16,cardozo22,elyasaf23}. 
+The \acf{COP} paradigm enables writing programs that dynamically adapt their behavior in response to 
+their execution context~\cite{hirschfeld08cop,appeltauer09cop,salvaneschi12survey,mens16,alegre16,cardozo22,elyasaf23}. 
 \ac{COP} programs are usually organized in \emph{layers}, modular units that encapsulate behavior 
 and state across different concerns, similar to the concept of \emph{object} in \ac{OOP}. Each 
 \emph{layer} (also known as \emph{context} in the literature) can be activated or deactivated depending 
-on the information gathered by the execution environment. Layer activation and deactivation 
-respectively make available and unavailable the behavior and state defined within the layer. The layer 
-activation mechanism allows programmers to express variability, without having to introduce statements 
-that toggle behavior inside the domain logic of their program~\cite{costanza05contextl}, achieving a 
-better modularity and separation of concerns.
+on the information gathered from the execution environment. Layer activation and deactivation 
+respectively make available and unavailable to the executing program, the behavior and state defined 
+within the layer. The layer activation mechanism allows programmers to express variability, without 
+having to introduce statements that toggle behavior inside the domain logic of their 
+program~\cite{costanza05contextl}, achieving a better modularity and separation of concerns.
 
 The behavior of a \ac{COP} program is determined by a set of partial methods associated with the 
 layers that are active at a given point in time (\fref{sec:preliminaries}). A \emph{partial configuration} is 
 defined as the set of layers that are active or inactive at a particular point in time of the 
-execution~\cite{martou24}. As the program grows in complexity, the set of all possible configurations 
-often suffers from a combinatorial explosion, making it harder to test and reason about the 
-program~\cite{martou24}, ultimately leading to bugs or execution anomalies.
-Validating the correctness of a context-oriented program has been a topic of interest in recent years, 
-and several solutions have been proposed, ranging from debuggers~\cite{uchio11}, formal execution 
-models~\cite{cardozo15jist, taing16cop, cardozo18sefsas}, and visualizers~\cite{duhoux18}, to static 
+execution~\cite{martou24}. As the program grows in complexity, the set of all possible partial 
+configurations often suffers from a combinatorial explosion, making it harder to test and reason about 
+the program~\cite{martou24}, ultimately leading to bugs or execution anomalies.
+Validating the correctness of a \ac{COP} program has been a topic of interest in recent years, 
+and several solutions have been proposed, as for example the use of debuggers~\cite{uchio11}, formal 
+execution models~\cite{cardozo15jist, taing16cop, cardozo18sefsas}, visualizers~\cite{duhoux18}, static 
 analysis tools~\cite{cardenas23}, dynamic analysis tools~\cite{cardozo14cop}, and testing 
-techniques~\cite{martou24}. However, at the time of writing, no application of Software Verification 
-techniques to \ac{COP} exists. The hypothesis of this work is that the use of Software Verification 
-techniques would help developers in building more reliable context-oriented programs, by providing 
+techniques~\cite{martou24}. However, currently, no application of software verification 
+techniques to \ac{COP} exists. The hypothesis of this work is that the use of software verification 
+would help developers in building more reliable \ac{COP} programs, by providing 
 tools to formally reason about the interaction between layers, and therefore, yield programs that are 
 consistent and complete in the execution of specified adaptation behavior.
 
-Type Systems are one of the most widely used tools for guaranteeing the correctness of program 
+Type systems are one of the most widely used tools for guaranteeing the correctness of program 
 properties. Refinement Types~\cite{jhala21} take it a step further, by allowing programmers to constraint 
 a type using logical predicates, enabling more expressive and precise contracts that get automatically 
 verified at compile-time. The idea of this work is to express layer activations and interactions using 
 Refinement Types (\fref{sec:state-of-the-art}), so that programmers can statically establish guarantees 
 about the intended behavior of a program, without needing to dynamically validate the vast space of 
-possible activation configurations. 
-
+possible partial configurations. 
 The main objective of this work is to illustrate how Refinement Types can be used to formally verify 
 \ac{COP} programs (\fref{sec:context-scala}), and to discuss the advantages and drawbacks of doing 
 so. The long term goal of this work is to serve as a stepping stone to propose methodologies, design 
-patterns or even libraries that integrate software verification with \ac{COP}.
+patterns, or even libraries that integrate software verification with \ac{COP}.
 
 To validate our work, we use a graphical editor, \emph{Bellevue} (\fref{sec:case-study}), inspired by 
-\emph{Gueze}~\cite{vallejos10pred} and developed as a case study. Bellevue is a sufficiently complex 
-application to assess the applicability of Refinement Types in \ac{COP}, as it encompasses several 
-operations and interactions between different behavioral components. The editor is written in a \ac{COP} 
-extension for Scala using Predicated Generic Functions~\cite{vallejos10pred}, and the Stainless 
-framework (a verifier for higher-order functional programs based on Refinement Types~\cite{hamza19}).
-While there exist different \ac{COP} languages, we extend Scala with \ac{COP} capabilities primarily 
-because:
+\emph{Gueze}~\cite{vallejos10pred}, as a case study. Bellevue is a sufficiently complex application to 
+assess the applicability of Refinement Types in \ac{COP}, as it encompasses several operations and 
+interactions between different behavioral components. The editor is developed in two iterations, one with 
+out Refinement Types, and one with Refinement Types, as an ablation of the usefulness of Refinement 
+Types. We show how the use of Refinement Types assures a consistent and complete \ac{COP} 
+program, for our case study.
+
+Bellevue is written in a \ac{COP} extension for Scala using Predicated Generic 
+Functions~\cite{vallejos10pred}, and the Stainless framework (a verifier for higher-order functional 
+programs based on Refinement Types~\cite{hamza19}). While there exist different \ac{COP} languages, 
+we extend Scala with \ac{COP} capabilities primarily because:
 \begin{enumerate*}[label=(\arabic*)]
   \item there is already a robust verifier implemented in this language that we can reuse out of the box,
   and
@@ -59,7 +61,7 @@ because:
   process of creating a light-weight \ac{COP} extension
 \end{enumerate*}
 
-This work is organized into six parts. \fref{sec:preliminaries} presents the preliminary concepts regarding 
+This work is organized as follows. \fref{sec:preliminaries} presents the preliminary concepts regarding 
 \ac{COP} and type systems. \fref{sec:state-of-the-art} contains the state of the art on verification of 
 \ac{COP} programs, and the main concepts to understand Refinement Types. \fref{sec:context-scala} 
 defines the core abstractions of our \ac{COP} library extending Scala, which is then used in 
@@ -76,3 +78,4 @@ between \ac{COP} and Refinement Types in our library.
 
 \endinput
 
+That is, that all functionality associated with a context is available to complete execution of the adaptation. 
