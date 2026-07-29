@@ -6,7 +6,7 @@
 
 This section provides the necessary background in both \ac{COP} and type systems for the 
 development of our work. We first present the main abstractions and base functionality of \ac{COP}, 
-as realized by our Scala library implementation using predicate generic functions. Then we provide a 
+as realized by our Scala library implementation using predicated generic functions. Then we provide a 
 brief introduction to software verification  using type systems.
 
 
@@ -14,11 +14,9 @@ brief introduction to software verification  using type systems.
 \subsection{Context-Oriented Programming}
 \label{sec:cop}
 
-\ac{COP} is a programming paradigm that enables the adaptation of software systems' behavior at 
-run time. \ac{COP} introduces language abstractions to define contexts, usually using the layer 
-abstraction~\cite{leger23}, and behavioral variations. At run time, behavioral variations are included to, 
-and withdrawn from the executing system dynamically using the activation and deactivation of layers 
-respectively.
+\ac{COP} introduces language abstractions to define layers and the behavioral variations (\ie partial 
+methods) associated to layers. At run time, behavioral variations are included to, and withdrawn from 
+the executing system dynamically using the activation and deactivation of layers respectively.
 
 The two most common activation mechanisms in \ac{COP} languages are the \emph{imperative} and 
 \emph{declarative} mechanisms~\cite{cardozo22,elyasaf23,leger23}. The imperative mechanism 
@@ -203,7 +201,7 @@ methods (\ie a less specific method) using \scode{call-next-method} (analogous t
 \ac{COP} language~\cite{vallejos10pred}. Here, the \scode{mouse-down} generic function is declared 
 in \fref{ln:lambic-example.declaration}. The definition contains the declaration of the predicates, with 
 the \scode{:predicates} keyword, that are used for the generic function to be applicable. After the 
-definition of the predicate generic function, follow a series of method declarations that conform to the 
+definition of the predicated generic function, follow a series of method declarations that conform to the 
 generic function. The activation predicate of each method is declared using the \scode{:when} keyword.
 
 Predicated generic functions are the base model to implement the \ac{COP} library for this work, since 
