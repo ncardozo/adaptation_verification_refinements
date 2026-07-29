@@ -1,30 +1,47 @@
-% $Id: conclusion.tex $
-% !TEX root = main.tex
+% !TEX root = ./../main.tex
 
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
-The main goal of work is to explore the use of Refinement Types to formally reason about \ac{COP} programs, and manage the possible inconsistencies that may arise at run-time, in response to the interaction between layers.
-Refinements Types are chosen due to their ease of integration with existing programming languages, and their powerful features that allow the programmer to formulate pre-conditions and post-conditions, as well as to prove mathematical statements about the written software.
-There are many ways to implement \ac{COP}, however, expressing it as a set of partial functions that can be composed together to incrementally build programs, significantly simplified the process of writing and verifying \ac{COP} applications.
-In this work we present Bellevue as a validating case study of an application to evidence some of the pitfalls that a programmer could encounter while writing \ac{COP} programs.
-In the validation we show how small modifications to the program, such as changing the composition order of \lstinline|PredicatedFunction|, or adding a condition to the activation predicates, can introduce bugs that are hard to detect, as the decoupling between application logic and layer activation (dispatching) makes it harder to reason about the program.
-Using Refinement Types, we put forward different abstractions to make these bugs explicit and statically verified. By enforcing the assumptions stated in the activation predicates into the application's logic, inconsistencies can be avoided while defining the functions and their composition. Once this is guaranteed, the programmer can then specify more complex properties to verify the interactions between functions by describing the dependencies between them in terms of activation and state manipulation.
+The objective of this work is to explore the use of Refinement Types to formally reason about \ac{COP} 
+programs, and manage the possible inconsistencies or incompleteness that may arise at run time, in 
+response to the interaction between layers. Refinements Types are chosen due to their ease of 
+integration with existing programming languages, and their powerful features that allow the programmer 
+to formulate functions' pre-conditions and post-conditions, as well as to prove mathematical statements 
+about the program's functionality. There are many ways to implement \ac{COP}, however, expressing it 
+as a set of partial functions that can be composed together to incrementally build programs, significantly 
+simplifies the process of writing and verifying \ac{COP} applications.
 
-As presented in \fref{sec:discussion}, the \lstinline|PredicatedFunction| and \lstinline|Chainable| abstractions could be improved,
-and more work could be done for verifying properties that involve states in different time instants. In particular, there are two main possibilities to improve this work:
+To validate the usefulness of Refinement Types in verifying \ac{COP} programs, we use the Bellevue 
+graphical editor, as a validating case study implemented in two iterations. The first iteration evidences 
+errors caused by unforeseen interactions between the layers in \ac{COP} programs. Modifications to the 
+program, such as changing the composition order of predicated functions, or adding a condition to the 
+activation predicates, can introduce bugs that are hard to detect, as the decoupling between application 
+logic and layer activation makes it harder to reason about the program. The second iterations uses
+Refinement Types, with the abstractions to mange them, making the bugs explicit and statically 
+verifiable. Enforcing the assumptions stated in the activation predicates into the application's logic, 
+inconsistencies and incompleteness can be avoided while defining the functions and their composition. 
+Once this is guaranteed, the programmer can then specify more complex properties to verify the 
+interactions between functions by describing the dependencies between them in terms of activation and 
+state manipulation.
 
-\begin{enumerate}[label=(\arabic*)]
-  \item Make the \lstinline|andThen| and \lstinline|orElse| functions depend on a \lstinline|Chainable| argument (or a similar abstraction),
-  in such a way that we disallow composing two functions unless there is evidence that the two functions can in fact be composed (in this case, by virtue of the \lstinline|isChainable| property).
-  Currently, if the programmer forgets to build a \lstinline|Chainable| instance to verify a layer interaction, they can still compose the layers since the composition functions are unrestricted.
-  Achieving this level of abstraction is challenging, because there may be other properties besides the \lstinline|isChainable| that we would like to specify as a pre-requirement for composing two functions.
-  Hence, this new \lstinline|andThen| function would need to receive arbitrarily user defined predicates, instead of constant ones like the \lstinline|isChainable| predicate.
-
-  \item Extend the current abstractions so that it is possible to specify properties about the state at different points in time.
-  We discussed in \fref{sec:case-study.discussion}, that a good example of this would be to statically guarantee that the \lstinline|ColorFillAction| always received the image state of a canvas, if the \lstinline|ColorFill| tool was selected at a previous (not necessarily adjacent) point in time.
-  A potentially good approach would be to use Temporal Logic with Refinement Types as it was explored in \fref{sec:related-work.verification-reactive-programming} of the Related Work chapter.
-\end{enumerate}
+As presented in \fref{sec:discussion}, the \scode{PredicatedFunction} and \scode{Chainable} 
+abstractions could be improved, and more work could be done for verifying properties that involve 
+states in different time instants. In particular, there are two main possibilities to improve this work.
+First, we can make the \scode{andThen} and \scode{orElse} functions depend on a \scode{Chainable} 
+argument (or a similar abstraction), in such a way that we disallow composing two functions unless there 
+is evidence that the two functions can in fact be composed (in this case, by virtue of the 
+\scode{isChainable} property). Currently, if programmers omit a \scode{Chainable} instance to verify a 
+layer interaction, they can still compose the layers; the composition functions are unrestricted. Achieving 
+this level of abstraction is challenging, because there may be other properties besides 
+\scode{isChainable} that we would like to specify as a pre-requirement for composing two functions.
+Hence, this new \scode{andThen} function would need to receive arbitrarily user defined predicates, 
+instead of constant ones like the \scode{isChainable} predicate.
+Second, extending the current abstractions would open the possibility to specify properties about the 
+state at different points in time. We discussed in \fref{sec:discussion}, that a good example of this would 
+be to statically guarantee conditions of a predicated behavior with respect to specific events 
+(\eg activation of a layer) at a previous (not necessarily adjacent) time.  A potentially good approach 
+would be to use Temporal Logic with Refinement Types.
 
 
 \endinput
