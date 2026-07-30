@@ -22,15 +22,8 @@ The two most common activation mechanisms in \ac{COP} languages are the \emph{im
 \emph{declarative} mechanisms~\cite{cardozo22,elyasaf23,leger23}. The imperative mechanism 
 explicitly states the region of code in which a layer is active. \fref{lst:imperative-activation} shows an 
 example of the imperative activation mechanism in which the partial behavior associated with a layer 
-is only available within the scope of the \scode{with} abstraction, after explicitly evaluating the condition 
-to satisfy (\ie battery level is bellow 20\%). The declarative mechanism, defines the scope of the layer 
-implicitly using a boolean expression, so that whenever it evaluates to \scode{true}, the behavioral 
-variation associated with the layer is made available. \fref{lst:declarative-activation} shows an 
-example of the declarative mechanism, defining a \scode{BatterySaverLayer} that should be in scope 
-only when the battery level is below 20 percent. The effect of this is that a calling to 
-\scode{someFunctionality} anywhere else in the code (as in \fref{ln:declartive-call}) will use the 
-behavior defined in the \scode{BatterySaverLayer} if is active, or the standard behavior of the 
-\scode{phone} otherwise.
+is only available within the scope of the \scode{with} abstraction, after evaluating the condition 
+to satisfy (\ie battery level is bellow 20\%). 
 
 \begin{scala}[label=lst:imperative-activation, caption=Imperative activation mechanism]
 val phone: Phone = ???
@@ -45,6 +38,14 @@ if batteryPercentage < 20 then
 // BatterySaverLayer methods are no longer in scope here.
 \end{scala}
 
+The declarative mechanism, defines the scope of the layer implicitly using a boolean expression, so 
+that whenever it evaluates to \scode{true}, the behavioral variation associated with the layer becomes 
+available. \fref{lst:declarative-activation} shows an example of the declarative mechanism activating 
+\scode{BatterySaverLayer} only when the battery level is below 20 percent. The effect of the activation 
+is that a call to \scode{someFunctionality} anywhere in the code (as in \fref{ln:declartive-call}) will use 
+the behavior defined in the \scode{BatterySaverLayer}. After deactivating the layer, the standard 
+behavior of the \scode{phone} is used.
+
 \begin{scala}[label=lst:declarative-activation, caption=Declarative activation mechanism]
 // The [[someFunctionality]] method definition in [[BatterySaverLayer]]
 // will override the original method from the [[phone]] object whenever
@@ -55,14 +56,14 @@ BatterySaverLayer.activateWhen(batteryPercentage < 20)
 phone.someFunctionality() `\label{ln:declartive-call}`
 \end{scala}
 
-Layers can be stacked on top of one another to compose behavior.
+Layers can be stacked on top of one another to compose behavior dynamically.
 If active, a layer can add or override functionality to the layer below it in the stack.
 Layer composition happens through the \scode{adapt} function, stacking up layers from right to left.
 Take for example the code in \fref{lst:layer-composition}. Four layers (\scode{Layer1}, \scode{Layer2}, 
 \scode{Layer3}, and \scode{Layer4}) are created from a base \scode{Naming} type.
 Moreover, behavior variations defined in layers can access the behavior in other previously active 
 layers (\ie layers underneath the current layer in the layer stack), using the \scode{proceed} method 
-as shown in \fref{ln:layer-composition.proceed-example} of \fref{lst:layer-composition}.
+as shown in \fref{ln:layer-composition.proceed-example}.
 As an example, consider the situation of calling the \scode{names} variable from the adaptations 
 defined by the layer composition in \fref{ln:layer-composition.adapted-layer}.
 The observed behavior depends on the layers that are active at the momento of the call. For instance, 
