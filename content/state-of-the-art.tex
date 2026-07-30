@@ -134,7 +134,6 @@ Uninterpreted functions also enable a mechanism for expressing arbitrary user-de
 polymorphic variables~\cite{jhala21}.
 
 To illustrate how Type Checking works with Refinement Types, we present an example of the simply typed lambda calculus with Refinement Types~\cite{jhala21}.
-
 \begin{align*}
 \text{Basic Types } b &::= int \; | \; unit \\
 \text{Type Refinements } r &::= \{v \; | \; p \} \\
@@ -147,7 +146,6 @@ To illustrate how Type Checking works with Refinement Types, we present an examp
   &| \quad e(e) \\
   &| \quad e:t \\
 \end{align*}
-
 Note that the predicates $p$ that refine the types are drawn from the decidable formulas defined in 
 \fref{eq:pred-eq}, and that there is a notion of $Kind$ within the language. A $Kind$ is a special 
 \emph{sort} that we use to organize all the types in the language. To avoid the logic paradox that 
@@ -252,7 +250,6 @@ term of type $int\{v  \mid 10 \leq v\}$ whenever we require a term of type $int\
 Finally there are some primitive values and functions that we can use in our language.
 These primitives have the most precise semantics encoded in their type~\cite{jhala21}.
 In Equation \ref{eq:prim}, $prim$ is an assignment from a primitive value to its type.
-
 \begin{equation}
 \label{eq:prim}
 \begin{split}
@@ -264,7 +261,6 @@ In Equation \ref{eq:prim}, $prim$ is an assignment from a primitive value to its
 \end{equation}
 
 We can use this assignment as a rule to check the types of primitive values:
-
 \begin{center}
 \begin{prooftree}
     \hypo{ prim(const) \doteq A }
@@ -336,7 +332,6 @@ of these features, and can be used as automated theorem provers. One can describ
 user-defined functions following the Propositions-as-Types paradigm, by stating the property as a 
 proposition in the Refinement Type, and constructing a term that inhabits such type as the proof of such 
 proposition. For instance, one could prove that the concatenation operation on lists ($+$) is associative.
-
 \[
   listAssoc : (l1 \; l2 \; l3 : list(a)) \rightarrow unit\{ \; l1 + (l2 + l3) = (l1 + l2) + l3 \; \}
 \]
@@ -345,18 +340,17 @@ Sometimes, the SMT solver will be able to automatically prove the given proposit
 properties get more complex, the programer can also explicitly provide the proof by building a term of 
 the specified type, often using a DSL defined by the Refinement Type language.
 
-There have been several usages of Refinement Types for developing reliable systems. The work done 
-by~\citet{kuper22} on verifying distributed systems with LiquidHaskell is a good example of the 
-applicability of Refinement Types in software development. In that work, Refinement Types are 
-used to formally verify that CRDT implementations are correct, by proving that the application of 
-operations to update the CRDT state is commutative. A CRDT is defined as a Typeclass containing 
-the type definitions of the operation and the proof obligation of its commutativity~\cite{kuper22}.
-Implementors of a CRDT instance are compelled to write the commutativity proof, otherwise the 
-program will not compile. Having the verification system embedded within the same language that the 
-programs are written on, is one of the main advantages highlighted by the proponents of Refinement 
-Type Systems~\cite{jhala21}. Unlike many software verification tools that formally reason about a 
-model that is separate from executable code, Refinement Types allow the developer to verify the 
-actual code that gets executed directly.
+There have been several usages of Refinement Types for developing reliable distributed systems with 
+LiquidHaskell is a good example of the  applicability of Refinement Types in software 
+development~\cite{kuper22,liittschwager25}. Refinement Types are used to formally verify that CRDT 
+implementations are correct, by proving that the application of operations to update the CRDT state is 
+commutative. A CRDT is defined as a Typeclass containing the type definitions of the operation and 
+the proof obligation of its commutativity~\cite{kuper22}. Implementors of a CRDT instance are 
+compelled to write the commutativity proof, otherwise the program will not compile. Having the 
+verification system embedded within the same language that the programs are written on, is one of the 
+main advantages highlighted by the proponents of Refinement Type Systems~\cite{jhala21}. Unlike 
+many software verification tools that formally reason about a model that is separate from executable 
+code, Refinement Types allow developers to verify the actual code that gets executed directly.
 
 
 %%
@@ -381,7 +375,7 @@ documentation.
 
 The \scode{require} and \scode{ensuring} functions are used to describe the pre-conditions and 
 post-conditions of the \scode{fact} function respectively. Stainless translates these calls to type 
-refinements similar to \scode{BigInt{v : v >= 0}} in both cases. These refinements are then type 
+refinements similar to \scode{BigInt\{v : v >= 0\}} in both cases. These refinements are type 
 checked as explained in \fref{sec:refinement-types}, by the generation of \ac{VC} constraints that are 
 fed to an \ac{SMT} solver. Stainless also supports a termination checker based on sized 
 types~\cite{hamza19}, and it is also able to prove theorems like the right-identity law of the Monoid 
