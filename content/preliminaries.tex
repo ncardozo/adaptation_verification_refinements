@@ -63,10 +63,10 @@ Take for example the code in \fref{lst:layer-composition}. Four layers (\scode{L
 \scode{Layer3}, and \scode{Layer4}) are created from a base \scode{Naming} type.
 Moreover, behavior variations defined in layers can access the behavior in other previously active 
 layers (\ie layers underneath the current layer in the layer stack), using the \scode{proceed} method 
-as shown in \fref{ln:layer-composition.proceed-example}.
-As an example, consider the situation of calling the \scode{names} variable from the adaptations 
-defined by the layer composition in \fref{ln:layer-composition.adapted-layer}.
-The observed behavior depends on the layers that are active at the momento of the call. For instance, 
+as shown in \fref{ln:layer-composition.proceed-example}. As an example, consider the situation of 
+calling the \scode{names} function (\fref{ln:layer-composition.adapted-layer}) using the adaptations 
+defined by the layer composition in \fref{ln:adaptation}.
+The observed behavior depends on the layers that are active at the moment of the call. For instance, 
 if only \scode{Layer2} and \scode{Layer4} are active, the call uses the implementation defined in 
 \scode{Layer2} and then proceeds to execute the definition of the behavior in \scode{Layer4}, yielding 
 a value of \scode{List("Layer2", "Layer4")} for the value \scode{composedNames}.
@@ -92,36 +92,35 @@ object Layer4 extends Layer[Naming]:
     List("Layer4")
 
 // [[adapt]] composes all given layers into one
-val naming: Layer[Naming] = adapt(Layer1, Layer2, Layer3, Layer4)
+val naming: Layer[Naming] = adapt(Layer1, Layer2, Layer3, Layer4) ` \label{ln:adaptation} `
 // Somewhere else in the code:
 val composedNames = naming.names // what is the result of this call? `\label{ln:layer-composition.adapted-layer}`
 \end{scala}
 
 Expressing variability as put forward in \ac{COP} is flexible and modular~\cite{cardozo22}, but it also 
 comes with challenges. In the previous example, take the situation in which \scode{Layer3} is the only 
-active layer when calling the \scode{names} method. Since \scode{Layer3} accesses the previously
-active layer by calling \scode{proceed()}, there is no other choice than to terminate the execution with 
-an error, as there is no other layer in scope, nor there is a base behavior to rely on (note the empty 
-method definition in \fref{ln:layer-composition.abstract-method}). Layered methods are often called 
-\emph{partial methods}, because they are only defined for their inputs when their associated layer is 
-active. We highlight that, as in our example, layered methods may result in incomplete compositions;
-an undefined behavior for certain activation \emph{configurations}.
-This issue has already been addressed through the use of type systems. Modeling activations with 
-Typestates and Heterogeneous Lists~\cite{aotani15}, or declaring the dependencies between Layers 
-at the type level~\cite{inoue14}, are some of the proposals that have been made to make invalid layer 
-access un-representable.
+active layer when calling the \scode{names} method. \scode{Layer3} accesses the previously active 
+layer by calling \scode{proceed()}, since there is no other active layer, nor there is a base behavior to 
+rely on (note the empty method definition in \fref{ln:layer-composition.abstract-method}), the execution 
+terminates with an error. Layered methods are often called 
+\emph{partial methods}, because they are only defined when their associated layer is 
+active. We highlight that, as in our example, partial methods may result in incomplete compositions;
+an undefined behavior for certain activation \emph{configuration}.
 
+There are proposals to make invalid layer access un-representable, by modeling activations with 
+Typestates and Heterogeneous Lists~\cite{aotani15}, or declaring the dependencies between 
+Layers~\cite{gonzalez11subc,cardozo12copn} at the type level~\cite{inoue14}.
 However, when a declarative activation mechanisms is used, there are situations in which such type 
 systems are not able to verify the program. For instance, \fref{lst:contradictory-activations} shows a 
 \scode{PrinterLayer} that requires the \scode{Layer[Naming]}, nonetheless, the activation condition of 
 one layer is the negation of the other 
 (\lnrange{ln:contradictory-activations.conditions-init}{ln:contradictory-activations.conditions-end}). 
-There, in this configuration, the \scode{printer} configuration will never be able to complete execution 
+In this configuration, the \scode{printer} layer will never be able to complete execution 
 correctly. A possible viable solution to this problem is to declare a type level dependency between both 
 layers as it is done in JCop~\cite{inoue14}. However, there is no apparent way to reconcile the 
 dependency between the layers, based on the way their activation is defined. Indeed, JCop forbids 
 declaring dependencies between layers that make use of declarative activation~\cite{inoue14}.
-Another possible alternative would be to redefine this example in terms of layer dependencies and 
+Another possible alternative is to redefine this example in terms of layer dependencies and 
 imperative activation, at the expense of losing the advantages that declarative activations provide.
 
 \begin{scala}[label=lst:contradictory-activations, caption={Layers with Contradictory Activation Conditions}]
@@ -166,8 +165,8 @@ systems in general.
 \label{sec:pred-gen-functions}
 
 Predicated generic functions are put forward as an implementation strategy for \ac{COP} 
-languages~\cite{vallejos10pred}. Predicate generic functions were first proposed as an extension to 
-the \ac{CLOS} language, to enable a fine-grained method dispatching based on logical predicates.
+languages~\cite{vallejos10pred}. Predicated generic functions were first proposed as an extension to 
+the \ac{CLOS} language, to enable fine-grained method dispatching based on logical predicates.
 A generic function encompasses a set of methods that share the same signature (name and 
 parameters). A predicated generic function is a generic function with a list of predicates (\ie boolean 
 expressions) following a specificity ordering: the first predicate in the list is the most general, and the 
@@ -205,8 +204,8 @@ the \scode{:predicates} keyword, that are used for the generic function to be ap
 definition of the predicated generic function, follow a series of method declarations that conform to the 
 generic function. The activation predicate of each method is declared using the \scode{:when} keyword.
 
-Predicated generic functions are the base model to implement the \ac{COP} library for this work, since 
-they offer a fine level of granularity for defining behavior variability.
+Predicated generic functions are the base model to implement the \ac{COP} language in this work, 
+since they offer a fine level of granularity for defining behavior variability.
 
 
 %%
@@ -227,7 +226,7 @@ accordance the rules of the $Bool$ type; in particular, the \emph{elimination} r
 commonly known as \text{if-then-else}. Any usage of $b$ outside this set of rules would be incorrect.
 
 Type checkers are program analysis tools that construct a proof tree following set inference rules. If 
-the proof tree cannot be constructed for a given annotated program, then it is incorrect and a type error 
+the proof tree cannot be constructed for a given annotated program, it is incorrect and a type error 
 is returned.  A type checker flags erroneous usages of terms as inconsistencies in the program. 
 
 Depending on the type theory used, it is possible to prove different kinds of properties about a program.
