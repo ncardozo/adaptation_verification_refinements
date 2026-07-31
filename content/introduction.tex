@@ -8,17 +8,18 @@ their execution context~\cite{hirschfeld08cop,appeltauer09cop,salvaneschi12surve
 \ac{COP} programs are usually organized in \emph{layers}, modular units that encapsulate behavior 
 and state across different concerns, similar to the concept of \emph{object} in \ac{OOP}. Each 
 \emph{layer} (also known as \emph{context} in the literature) can be activated or deactivated depending 
-on the information gathered from the execution environment. Layer activation makes available to the executing program, 
-the behavior and state defined within that layer. Such mechanism allows programmers to express variability, without 
-having to introduce statements that toggle behavior inside the domain logic of their 
-program~\cite{costanza05contextl}, achieving a better modularity and separation of concerns.
+on the information gathered from the execution environment. Layer activation makes available, to the 
+executing program, the behavior and state defined within that layer. Such mechanism allows 
+programmers to express variability, without having to introduce statements that toggle behavior inside 
+the domain logic of their program~\cite{costanza05contextl}, achieving a better modularity and 
+separation of concerns.
 
 The behavior of a \ac{COP} program is determined by a set of partial methods associated with the 
 layers that are active (\fref{sec:preliminaries}). A \emph{partial configuration} is 
 defined as the set of layers that are active or inactive at a particular point in time of the 
 execution~\cite{martou24}. As the program grows in complexity, the set of all possible partial 
 configurations often suffers from a combinatorial explosion, making it harder to test and reason about 
-it~\cite{martou24}, leading to bugs or execution anomalies.
+the program~\cite{martou24}, leading to bugs or execution anomalies.
 Validating the correctness of a \ac{COP} program has been a topic of interest in recent years, 
 and several solutions have been proposed: debuggers~\cite{uchio11}, formal 
 execution models~\cite{cardozo15jist, taing16cop, cardozo18sefsas}, visualizers~\cite{duhoux18}, static 
@@ -35,18 +36,18 @@ a type using logical predicates, enabling more expressive and precise contracts 
 verified at compile-time. The idea is to express layer activations and interactions using 
 Refinement Types (\fref{sec:state-of-the-art}), so that programmers can statically establish guarantees 
 about the intended behavior of a program, without needing to dynamically validate the vast space of 
-possible partial configurations. We will illustrate how Refinement Types can be used to formally verify 
+possible partial configurations. We illustrate how Refinement Types can be used to formally verify 
 \ac{COP} programs (\fref{sec:context-scala}), and discuss the advantages and drawbacks of doing 
-so. The long term goal is to serve as a stepping stone to propose methodologies, design 
+so. The long term goal is for this work to act as a stepping stone to propose methodologies, design 
 patterns, or even libraries that integrate software verification with \ac{COP}.
 
 To validate our work, we built the \emph{Bellevue} graphical editor (\fref{sec:case-study}) (inspired by 
 \emph{Gueze}~\cite{vallejos10pred}) as a case study. Bellevue is a sufficiently complex application to 
 assess the applicability of Refinement Types in \ac{COP}, as it encompasses several operations and 
-interactions between different behavioral components. We first developed the editor without Refinement Types, 
-to assess and categorize the types of bugs that one would encounter in a common \ac{COP} application. 
-We then adapted the editor to use Refinement Types and established some properties to detect the encountered bugs 
-at compile-time.
+interactions between different behavioral components. We first developed the editor without Refinement 
+Types, to assess and categorize the types of bugs that one would encounter in a common \ac{COP} 
+application. We then adapted the editor to use Refinement Types and established some properties to 
+detect the encountered bugs at compile-time.
 
 Bellevue is written in a \ac{COP} extension for Scala using Predicated Generic 
 Functions~\cite{vallejos10pred} and the Stainless framework (a verifier for higher-order functional 
