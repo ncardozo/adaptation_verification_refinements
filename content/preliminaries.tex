@@ -14,16 +14,16 @@ brief introduction to software verification  using type systems.
 \subsection{Context-Oriented Programming}
 \label{sec:cop}
 
-\ac{COP} introduces language abstractions to define layers and the behavioral variations (\ie partial 
-methods) associated to layers. At run time, behavioral variations are included to, and withdrawn from 
+\ac{COP} introduces language abstractions to define layers and their behavioral variations (\ie partial 
+methods). At run time, behavioral variations are included to, and withdrawn from 
 the executing system dynamically using the activation and deactivation of layers respectively.
 
 The two most common activation mechanisms in \ac{COP} languages are the \emph{imperative} and 
 \emph{declarative} mechanisms~\cite{cardozo22,elyasaf23,leger23}. The imperative mechanism 
 explicitly states the region of code in which a layer is active. \fref{lst:imperative-activation} shows an 
-example of the imperative activation mechanism in which the partial behavior associated with a layer 
+example of the imperative activation mechanism where the layer's partial behavior 
 is only available within the scope of the \scode{with} abstraction, after evaluating the condition 
-to satisfy (\ie battery level is bellow 20\%). 
+be to satisfied (\ie battery level is bellow 20\%). 
 
 \begin{scala}[label=lst:imperative-activation, caption=Imperative activation mechanism]
 val phone: Phone = ???
@@ -38,7 +38,7 @@ if batteryPercentage < 20 then
 // BatterySaverLayer methods are no longer in scope here.
 \end{scala}
 
-The declarative mechanism, defines the scope of the layer implicitly using a boolean expression, so 
+The declarative mechanism, on the other hand, defines the scope of the layer implicitly using a boolean expression, so 
 that whenever it evaluates to \scode{true}, the behavioral variation associated with the layer becomes 
 available. \fref{lst:declarative-activation} shows an example of the declarative mechanism activating 
 \scode{BatterySaverLayer} only when the battery level is below 20 percent. The effect of the activation 
@@ -62,13 +62,13 @@ Layer composition happens through the \scode{adapt} function, stacking up layers
 Take for example the code in \fref{lst:layer-composition}. Four layers (\scode{Layer1}, \scode{Layer2}, 
 \scode{Layer3}, and \scode{Layer4}) are created from a base \scode{Naming} type.
 Moreover, behavior variations defined in layers can access the behavior in other previously active 
-layers (\ie layers underneath the current layer in the layer stack), using the \scode{proceed} method 
+layers (\ie layers underneath the current layer in the stack), using the \scode{proceed} method 
 as shown in \fref{ln:layer-composition.proceed-example}. As an example, consider the situation of 
 calling the \scode{names} function (\fref{ln:layer-composition.adapted-layer}) using the adaptations 
 defined by the layer composition in \fref{ln:adaptation}.
 The observed behavior depends on the layers that are active at the moment of the call. For instance, 
 if only \scode{Layer2} and \scode{Layer4} are active, the call uses the implementation defined in 
-\scode{Layer2} and then proceeds to execute the definition of the behavior in \scode{Layer4}, yielding 
+\scode{Layer2} and then proceeds to execute \scode{Layer4}, yielding 
 a value of \scode{List("Layer2", "Layer4")} for the value \scode{composedNames}.
 
 \begin{scala}[label=lst:layer-composition, caption=Layer Composition]
@@ -98,7 +98,7 @@ val composedNames = naming.names // what is the result of this call? `\label{ln:
 \end{scala}
 
 Expressing variability as put forward in \ac{COP} is flexible and modular~\cite{cardozo22}, but it also 
-comes with challenges. In the previous example, take the situation in which \scode{Layer3} is the only 
+comes with challenges. In the previous example, take the situation where \scode{Layer3} is the only 
 active layer when calling the \scode{names} method. \scode{Layer3} accesses the previously active 
 layer by calling \scode{proceed()}, since there is no other active layer, nor there is a base behavior to 
 rely on (note the empty method definition in \fref{ln:layer-composition.abstract-method}), the execution 
@@ -225,23 +225,23 @@ program behavior"~\cite{pierce02}. The judgement $b : Bool$ states that $b$ may 
 accordance the rules of the $Bool$ type; in particular, the \emph{elimination} rule for booleans, most 
 commonly known as \text{if-then-else}. Any usage of $b$ outside this set of rules would be incorrect.
 
-Type checkers are program analysis tools that construct a proof tree following set inference rules. If 
+Type checkers are programs that construct a proof tree following a set inference rules. If 
 the proof tree cannot be constructed for a given annotated program, it is incorrect and a type error 
 is returned.  A type checker flags erroneous usages of terms as inconsistencies in the program. 
 
 Depending on the type theory used, it is possible to prove different kinds of properties about a program.
 If Linear Types are used, one may prove that certain program values are accessed at most 
 once~\cite{wadler93}. If Session Types are used, one may prove that the interaction between a given 
-set of participants behaves exactly as specified by a given communication protocol~\cite{yoshida20}.
+set of processes behave exactly as specified by a given communication protocol~\cite{yoshida20}.
 If a more general theory is used, for instance, Martin-Löf's Dependent Type Theory, then one may 
 prove various mathematical statements using an \emph{intuitionistic} logical 
 interpretation~\cite{rijke22}.
 
 For this work in particular, Refinement Types will be used to prove some properties about interactions 
-and activations in a \ac{COP} program. Refinement types embed assertions from classical program 
+and activations in a \ac{COP} program. Refinement types embed assertions from classical 
 logic into the types~\cite{jhala21}. The programmer is able to extend a base type with a logical 
 predicate, and the system will automatically verify that the term of that type complies with the specified 
-predicate. We extend on the presentation of Refinement Types in the following.
+predicate. We extend on the presentation of Refinement Types in the following section.
 
 
 \endinput
