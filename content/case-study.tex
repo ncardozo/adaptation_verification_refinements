@@ -48,7 +48,7 @@ making HTTP requests or drawing into an HTML Canvas, are examples of \textbf{Com
 
 This architectural style is chosen for its simplicity. Since the Elm architecture is a purely functional 
 approach for implementing web applications, it is easier to integrate with the \emph{Stainless} 
-framework, which is intended for functional programs.
+framework, which is mainly intended for functional programs.
 
 \begin{figure}[pos=hptb]
   \centering
@@ -61,9 +61,9 @@ framework, which is intended for functional programs.
 The full implementation of the application is available at our repository: 
 \url{https://github.com/slemus9/bellevue}.
 
-For the case study we implement two versions of Bellevue. The first iteration uses the \ac{COP} 
-abstractions purely. The second iteration integrates Refinement types to the first iteration, to assure the 
-consistency and completeness of interactions between adaptations, fixing the errors that appear.
+For the case study we implemented two versions of Bellevue. The first iteration uses the basic \ac{COP} 
+abstractions, and the second one integrates Refinement types to assure the 
+consistency and completeness of interactions between adaptations, fixing the errors that appeared in the first iteration.
 
 
 %%
@@ -109,7 +109,7 @@ final case class MouseDragging(
 \end{scala}
 
 Finally, \scode{Msg} is a Sum Type of all types of \textbf{Messages} that can be exchanged in the 
-application, as follows.
+application.
 
 \begin{scala}[label=lst:bellevue-msg]
 type Msg = ControlMsg | MouseMsg | Msg.Partial | ToolboxMsg
@@ -216,9 +216,9 @@ the user releases the mouse (\scode{MouseUp}), it will set the \scode{mouseDragg
     copy(mouseDragging = None)
 \end{scala}
 
-Since most drawing actions are mouse dragging interactions, we abstract the behavior into a separate 
-function to enable better reusability, \scode{MouseDragUpdateAction}. Actions like drawing rectangles 
-or erasing are similar to the \scode{BrushAction} function, and they also rely on a proper model update 
+Since most drawing actions are mouse dragging interactions, we can rely on the 
+\scode{MouseDragUpdateAction} function for better reusability. Actions like drawing rectangles 
+or erasing are similar to the \scode{BrushAction} function, and they also need a proper model update 
 of the \scode{mouseDragging} state. \fref{lst:bellevue-common-draw-actions-predicates} shows the 
 activation predicates for other common drawing actions.
 
@@ -286,8 +286,7 @@ be composed in the right order, taking into account the implicit dependencies be
 conditions. 
 
 During the first iteration of Bellevue, we identified bugs arising from inconsistencies in the interaction 
-between the partial functions. There are two types of errors identified in the application, inconsistencies, 
-and incomplete behavior.
+between the partial functions, and condensed them into two broad error categories.
 
 The first type of error is the incorrectly-ordered compositions, leading to the inconsistent rendering of 
 drawings. For instance, if the \scode{MouseDragUpdateAction} is placed as the first function of the 
@@ -322,7 +321,7 @@ val invalidChain = new Chainable[DrawingModel, Cmd]:
   override def second = new BrushAction
 \end{scala}
 
-To prevent this type of errors, we can rely on the \scode{Chainable} type (presented in 
+To prevent these type of errors, we can rely on the \scode{Chainable} type (presented in 
 \fref{sec:refined-predicated-functions}) to verify that the activation and state manipulation of one 
 function, does not deactivate a subsequent function in the composition. The \scode{validChain} value 
 compiles successfully in \fref{lst:enforcing-dependencies}, given that the following typing judgement is 
@@ -339,7 +338,7 @@ isChainable &: (previous: Cmd) \\
 \end{equation}
 
 Recall from \fref{lst:bellevue-brush-action} that \scode{BrushAction} returns the previous state without 
-modifications in all of its branches, thus \scode{BrushAction.run(previous, state).first = state}, reducing 
+modifications in all of its branches, and thus the equality \scode{BrushAction.run(previous, state).first = state} holds, reducing 
 the type definition to
 
 \begin{equation*}
@@ -397,8 +396,8 @@ def oneOfLaw(previous: Cmd, state: DrawingModel): Boolean =
   }.holds  ` \label{ln:list-dependencies-end} `
 \end{scala}
 
-The second type of errors that appear in the implementation of dependencies between partial functions 
-comes from the over-specifying the activation predicates. For instance, it makes sense to add the 
+The second type of errors that appeared when implementing the dependencies between partial functions 
+comes from over-specifying the activation predicates. For instance, it makes sense to add the 
 \scode{state.mouseDragging.isDefined} condition to the \scode{isActive} predicate of 
 \scode{RectangleAction}, just as it was done in the \scode{BrushAction}'s activation predicate.
 However, the \scode{RectangleAction} also needs to display an overlaid element to highlight the place 
