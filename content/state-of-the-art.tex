@@ -30,7 +30,7 @@ then restricted by the \scode{0 <= v} predicate.
 \end{scala}
 
 The types of the parameters and return values of a function can also be refined, effectively providing a 
-way of specifying its pre- and post-conditions of a function. In fact, 
+way of specifying its pre- and post-conditions; in fact, 
 Refinement Types have a deep connection with Hoare Logic~\cite{chen22}. Refinement Types also 
 allow the developer to declare Dependent Function Types which are, in practical terms, functions 
 whose return type may depend on the input~\cite{rijke22}. Using these features, one may describe very 
@@ -180,8 +180,8 @@ unfold global definitions ($\delta$).
 \end{multicols}
 
 Refinement Types extend this set of rules to introduce predicate refinements for the basic types.
-All types and their refinements must be first organized in terms of the Kind system that presented 
-previously. To achieve this, the type system has well-formedness rules that state how Kinds are 
+All types and their refinements must be first organized in terms of the aforementioned Kind system. 
+To achieve this, the type system has well-formedness rules that state how Kinds are 
 inhabited~\cite{jhala21}
 
 \begin{multicols}{2}
@@ -221,7 +221,7 @@ rules Ent-emp and Ent-ext.
 
 The Ent-emp rule states that any \ac{VC} constraint $c$ is valid if the \ac{SMT} solver determined 
 that $c$ holds. Ent-ext specifies that constraint $c$ can be derived from some context $\Gamma$ 
-extended with the refinement of type $b$ for term $x$, $ x : b \{x \; | \; p \}$, if the constraint 
+extended with the refinement of type $b$ (that is, $ x : b \{x \; | \; p \}$), if the constraint 
 $\forall x : b \: . \: p \Rightarrow c$ can be derived from $\Gamma$. The Type Checker will use Ent-ext 
 to generate the \ac{VC} constraints from the Refined Type, and then it will use the Ent-emp rule to 
 decide if the Refinement Type is valid by consulting the \ac{SMT} solver.
@@ -340,7 +340,7 @@ Sometimes, the SMT solver will be able to automatically prove the given proposit
 properties get more complex, the programer can also explicitly provide the proof by building a term of 
 the specified type, often using a DSL defined by the Refinement Type language.
 
-There have been several usages of Refinement Types for developing reliable distributed systems with 
+There have been several usages of Refinement Types for developing reliable systems. The formalization of distributed systems with 
 LiquidHaskell is a good example of the  applicability of Refinement Types in software 
 development~\cite{kuper22,liittschwager25}. Refinement Types are used to formally verify that CRDT 
 implementations are correct, by proving that the application of operations to update the CRDT state is 
@@ -415,26 +415,26 @@ Now that we have presented Refinement Types, we make an argument for the difficu
 
 In general, the result of a partial method depends on the order of the composition of layers, and the 
 current active layers. This property makes it difficult to reason about the expected behavior of a 
-\ac{COP} program, specially when using the implicit activation and scoping mechanism is used. 
+\ac{COP} program, specially when using the implicit activation and scoping mechanism. 
 Program flow can become complicated very quickly when layers depend on partial methods provided 
-by other layers, as the result of a call does not only depend on the activation conditions of the partial 
-method called, but also on the activations of all other layers. The problem is finding  a way of 
+by other layers, as the result of a call does not only depend on the activation conditions of the  
+method being called, but also on the activations of all the other layers. The problem is finding  a way of 
 validating that the observed behavior is as expected for all possible interactions and activation 
 configurations. In practice, the space of possible layer combinations is exponential, making such 
 approach unfeasible.
 
-As previously mentioned, a recent validation approach puts forward the use of combinatorial testing to 
+A recent validation approach puts forward the use of combinatorial testing to 
 generate a set of transitions between partial configurations, in order to detect incorrect behavior that 
 arise from the activation of specific layers~\cite{martou24}. Combinatorial testing generates transitions 
 between configurations in accordance to a given heuristic. Heuristics are used to maximize the 
 coverage of interactions while optimizing for performance, as it is not practical to explore the complete 
 space of all possible transitions. The drawback of this is, however, that there may be some error cases 
-that cannot be detected if the heuristic does not generate one particular transition triggering the error.
+that cannot be detected if the heuristic does not generate a particular transition that could trigger an error.
 
 Using Refinement Types, it is possible to statically verify properties about layer configurations to 
-guarantee correct behavior without the need to explore the full space of combinations.
+guarantee correct behavior without needing to explore the full space of combinations.
 Refinement Types provide a specification for transitions between valid program configurations; that is, 
-can verify there are no incomplete program traces due to missing partial method dependencies. Using 
+they can verify that there are no incomplete program traces due to missing partial method dependencies. Using 
 Refinement Types we can enforce program completeness by design, as incomplete programs lead to 
 compile-time errors.
 
