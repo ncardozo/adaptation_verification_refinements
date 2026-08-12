@@ -240,7 +240,7 @@ has many of the disadvantages exposed in \fref{sec:problem-of-verifying-cop} whe
 the result of a functional composition. Take for instance the code in
 \fref{lst:predicated-function-composition-example}. The value of \scode{run1} would be different if the 
 programmer composed the functions in a different order; for example, the composition 
-\scode{sequence(Fun1, Fun3, Fun2)} yields \scode{(11, "Hello from Fun2. ")} when applied to the pair 
+\scode{sequence(Fun1, Fun3, Fun2)} yields \scode{(11, "Hello from Fun2.")} when applied to the pair 
  \scode{(1, "")}. Furthermore, the state manipulation of a function may 
 contradict the activation predicate of the next function in the composition chain.
 \fref{lst:predicated-function-contradictory-composition} shows an example where the first function 
