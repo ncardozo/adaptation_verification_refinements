@@ -16,8 +16,8 @@ verifier.
 We present a light-weight \ac{COP} extension for Scala based on predicated generic functions. Our 
 implementation has all components required to enable dynamic software adaptations, following the 
 scoping and activation rules of \ac{COP} languages. Recall from \fref{sec:cop}, that layers encapsulate 
-partial behavior which are in scope only when their associated layers are determined to active, 
-following the language's activation mechanism. In our implementation, we define layers using the 
+partial behavior which is in scope only when its associated layer is determined to be active by
+the language's activation mechanism. In our implementation, we define layers using the 
 \scode{PredicatedFunction} abstraction. A \scode{PredicatedFunction} is the combination of an 
 activation condition and a \scode{Behavior}. The activation condition is a predicate that depends on 
 the state of the current execution context, while the \scode{Behavior} is a function that may manipulate 
@@ -74,8 +74,8 @@ translated to function composition, which is easier to implement. Rather than ha
 we use Higher-Order Functions to express state manipulations that may depend on previous 
 computations.
 
-Finally, with these definitions in place, a \scode{PredicatedFunction} is defined, as in 
-\fref{lst:predicated-function}, as a partial \scode{Behavior}.
+Finally, with these definitions in place, a \scode{PredicatedFunction} as a partial \scode{Behavior} 
+(\fref{lst:predicated-function}).
 
 \begin{scala}[label=lst:predicated-function, caption=Definition of a \scode{PredicatedFunction}]
  trait PredicatedFunction[S, A]:
@@ -87,7 +87,7 @@ Finally, with these definitions in place, a \scode{PredicatedFunction} is define
 
 We use the \scode{Monad} instance of the \scode{State} type to compose various \scode{Behavior} 
 types. There are two strategies to combine two \scode{PredicatedFunctions}. The first strategy, shown 
-in \fref{lst:predicated-function-adnThen}, consist on simply running them one after the other and 
+in \fref{lst:predicated-function-adnThen}, consists on simply running them one after the other and 
 feeding the result of the first into the second one. If the \scode{Behavior} of only one of the two 
 functions is active according to its predicate for the current state, the corresponding result is returned. 
 If both predicated functions are active at the same time, the \scode{Behavior} of both is chained 
@@ -198,7 +198,7 @@ object Fun3 extends PredicatedFunction[Int, String]:
 \end{scala}
 
 \fref{lst:predicated-function-composition-example} demonstrates how to combine the \scode{Behavior} 
-defined in \fref{lst:predicated-function-creation-example}, using the two composition strategies. Using 
+defined in \fref{lst:predicated-function-creation-example} with our two composition strategies: using 
 \scode{sequence} in \fref{ln:predicated-function-composition-example.fun4}, and \scode{oneOf} in 
 \fref{ln:predicated-function-composition-example.fun5}.
 
@@ -240,8 +240,8 @@ has many of the disadvantages exposed in \fref{sec:problem-of-verifying-cop} whe
 the result of a functional composition. Take for instance the code in
 \fref{lst:predicated-function-composition-example}. The value of \scode{run1} would be different if the 
 programmer composed the functions in a different order; for example, the composition 
-\scode{sequence(Fun1, Fun3, Fun2)} yields \scode{(11, "Hello from Fun2. ")}, when applied to the pair 
-of initial state and result \scode{(1, "")}. Furthermore, the state manipulation of a function may 
+\scode{sequence(Fun1, Fun3, Fun2)} yields \scode{(11, "Hello from Fun2. ")} when applied to the pair 
+ \scode{(1, "")}. Furthermore, the state manipulation of a function may 
 contradict the activation predicate of the next function in the composition chain.
 \fref{lst:predicated-function-contradictory-composition} shows an example where the first function 
 manipulates the state in such a way that the next function will never be available.
@@ -274,11 +274,10 @@ results for these compositions make sense from a requirements standpoint. Howeve
 in \fref{sec:problem-of-verifying-cop}, a comprehensive validation of a \ac{COP} program can be 
 complex and expensive due to the combinatorial explosion of possible states and layer interactions.
 
-Instead we propose a verification approach, that through the use of Refinement types makes it 
-possible to embed logic statements into the program, and automatically verify their validity. The effect 
-of such an approach is reducing the cost of exploring the vast space of possible states, activations, 
-and interactions. 
-To incorporate Refinement Types into predicated functions, we modify the \scode{PredicatedFunction} 
+Through the use of Refinement types, we propose a verification approach where
+we declare the properties that these interactions must fulfill. 
+Such approach reduces the cost of exploring the space of possible combinations, because it relies on automated logical reasoning instead of test case generation.
+In order to incorporate them into our predicated functions, we modify the \scode{PredicatedFunction} 
 definition to add the activation predicate as a precondition to the \scode{run} function, as show in 
 \fref{lst:predicated-function-run-precondition}.
 
@@ -353,7 +352,7 @@ abstract class Chainable[S, A]:
 
 An instance of the \scode{Chainable} type serves as an evidence that, for the given \scode{first} and 
 \scode{second} predicated functions, the \scode{isChainable} predicate holds for all possible values of 
-\scode{previous: A} and \scode{state: S}. The property states that the activation condition of the 
+\scode{previous: A} and \scode{state: S}. This property states that the activation condition of the 
 \scode{first} function implies that, when applying it to the previous result and state, the \scode{second} 
 function will be active for the new returned state. The type of the \scode{isChainable} property is shown 
 in Equation \ref{eqn:isChainable}.
