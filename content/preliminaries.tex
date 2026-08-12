@@ -38,7 +38,7 @@ if batteryPercentage < 20 then
 // BatterySaverLayer methods are no longer in scope here.
 \end{scala}
 
-The declarative mechanism, on the other hand, defines the scope of the layer implicitly using a boolean expression, so 
+The declarative mechanism defines the scope of the layer implicitly using a boolean expression, so 
 that whenever it evaluates to \scode{true}, the behavioral variation associated with the layer becomes 
 available. \fref{lst:declarative-activation} shows an example of the declarative mechanism activating 
 \scode{BatterySaverLayer} only when the battery level is below 20 percent. The effect of the activation 
