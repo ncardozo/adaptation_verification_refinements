@@ -61,7 +61,7 @@ framework, which is mainly intended for functional programs.
 The full implementation of the application is available at our repository: 
 \url{https://github.com/slemus9/bellevue}.
 
-For the case study we implemented two versions of Bellevue. The first iteration uses the basic \ac{COP} 
+For the case study we implement two versions of Bellevue. The first iteration uses the basic \ac{COP} 
 abstractions, and the second one integrates Refinement types to assure the 
 consistency and completeness of interactions between adaptations, fixing the errors that appeared in the first iteration.
 
@@ -321,7 +321,7 @@ val invalidChain = new Chainable[DrawingModel, Cmd]:
   override def second = new BrushAction
 \end{scala}
 
-To prevent these type of errors, we can rely on the \scode{Chainable} type (presented in 
+To prevent these types of errors, we can rely on the \scode{Chainable} type (presented in 
 \fref{sec:refined-predicated-functions}) to verify that the activation and state manipulation of one 
 function, does not deactivate a subsequent function in the composition. The \scode{validChain} value 
 compiles successfully in \fref{lst:enforcing-dependencies}, given that the following typing judgement is 
